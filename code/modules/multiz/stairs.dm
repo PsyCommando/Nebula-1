@@ -1,21 +1,62 @@
 /obj/structure/stairs
-	name = "stairs"
-	desc = "Stairs leading to another deck. Not too useful if the gravity goes out."
-	icon = 'icons/obj/stairs.dmi'
-	density = FALSE
-	opacity = FALSE
-	anchored = TRUE
-	layer = RUNE_LAYER
+	name                   = "stairs"
+	desc                   = "Stairs leading to another deck. Not too useful if the gravity goes out."
+	icon                   = 'icons/obj/stairs.dmi'
+	density                = FALSE
+	opacity                = FALSE
+	anchored               = TRUE
+	layer                  = RUNE_LAYER
+	material               = /decl/material/solid/metal/steel
+	tool_interaction_flags = TOOL_INTERACTION_DECONSTRUCT
+	parts_amount           = 1
+	parts_type             = /obj/item/structure_kit/stairs
+	var/stair_length       = WORLD_ICON_SIZE //Length of the stairs icon in pixels
+	var/stair_width        = WORLD_ICON_SIZE //Width of the stairs icon in pixels
 
-/obj/structure/stairs/Initialize()
+/obj/structure/stairs/Initialize(var/ml)
 	for(var/turf/turf in locs)
 		var/turf/above = GetAbove(turf)
 		if(!istype(above))
 			warning("Stair created without level above: ([loc.x], [loc.y], [loc.z])")
 			return INITIALIZE_HINT_QDEL
-		if(!above.is_open())
+		if(!above.is_open() && ml) //Only do that on map load plz
 			above.ChangeTurf(/turf/simulated/open)
 	. = ..()
+
+/obj/structure/stairs/on_update_icon()
+	. = ..()
+
+	//Reset all to default
+	bound_width  = initial(bound_width) //Bound is one tile per default
+	bound_height = initial(bound_height)
+	bound_x      = initial(bound_x)
+	bound_y      = initial(bound_x)
+	pixel_x      = initial(pixel_x)
+	pixel_y      = initial(pixel_y)
+
+	//Then tweak depending on direction
+	switch(dir)
+		if(NORTH)
+			bound_width  = stair_width
+			bound_height = stair_length
+			//Offset it, so the lower corner left of the icon aligns with the lower left corner of the object bounds
+			bound_y = -1 * (bound_height - WORLD_ICON_SIZE)
+			pixel_y = -1 * (bound_height - WORLD_ICON_SIZE)
+
+		if(SOUTH)
+			bound_width  = stair_width
+			bound_height = stair_length
+
+		if(EAST)
+			bound_width  = stair_length
+			bound_height = stair_width
+			//Offset it, so the lower corner left of the icon aligns with the lower left corner of the object bounds
+			bound_x = -1 * (bound_width - WORLD_ICON_SIZE)
+			pixel_x = -1 * (bound_width - WORLD_ICON_SIZE)
+
+		if(WEST)
+			bound_width  = stair_length
+			bound_height = stair_width
 
 /obj/structure/stairs/CheckExit(atom/movable/mover, turf/target)
 	if((get_dir(loc, target) == dir) && (get_turf(mover) == loc))
@@ -47,21 +88,13 @@
 
 /obj/structure/stairs/long
 	icon = 'icons/obj/stairs_64.dmi'
-	bound_height = 64
+	stair_length = 64
 
 /obj/structure/stairs/long/north
 	dir = NORTH
-	bound_y = -32
-	pixel_y = -32
 
 /obj/structure/stairs/long/east
 	dir = EAST
-	bound_width = 64
-	bound_height = 32
-	bound_x = -32
-	pixel_x = -32
 
 /obj/structure/stairs/long/west
 	dir = WEST
-	bound_width = 64
-	bound_height = 32
