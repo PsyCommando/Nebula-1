@@ -46,11 +46,6 @@
 	name = "circuitboard (turbine control console)"
 	build_path = /obj/machinery/computer/turbine_computer
 
-/obj/item/stock_parts/circuitboard/solar_control
-	name = "circuitboard (solar control console)"
-	build_path = /obj/machinery/power/solar_control
-	origin_tech = "{'programming':2,'powerstorage':2}"
-
 /obj/item/stock_parts/circuitboard/prisoner
 	name = "circuitboard (prisoner management console)"
 	build_path = /obj/machinery/computer/prisoner

@@ -136,6 +136,7 @@ var/global/const/BLAST_DOORS_FREQ  = 1303 // Used by blast doors, buttons contro
 var/global/const/AIRLOCK_FREQ      = 1305 // Used by airlocks and buttons controlling them.
 var/global/const/SHUTTLE_AIR_FREQ  = 1331 // Used by shuttles and shuttle-related atmos systems.
 var/global/const/EXTERNAL_AIR_FREQ = 1381 // Used by some external airlocks.
+var/global/const/SOLARS_FREQ       = 1463 // Used by solar panels
 
 var/global/list/radiochannels = list(
 	"Common"		= PUB_FREQ,

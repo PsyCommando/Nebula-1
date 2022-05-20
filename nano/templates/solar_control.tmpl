@@ -1,0 +1,36 @@
+{{function mode_btn(mode_name, mode_id, cur_mode){ }}
+	{{:helper.link( mode_name, null, {'track_mode' : mode_id}, cur_mode == mode_id ? 'linkOff' : null )}}
+{{ } }}
+
+{{function track_control_buttons(value_name, value_txt, min_incr, max_incr, max_deg){ }}	
+	{{if(max_deg)}}
+		{{:helper.link('|-', null, {'rate_control' : 1, value_name : -max_deg})}}
+	{{/if}}
+	{{:helper.link('--', null, {'rate_control' : 1, value_name : -max_incr})}}{{:helper.link('-', null, {'rate_control' : 1, value_name : -min_incr})}} {{:(value_txt? value_txt : 0)}} {{:helper.link('+', null, {'rate_control' : 1, value_name : min_incr})}}{{:helper.link('++', null, {'rate_control' : 1, value_name : max_incr})}}
+	{{if(max_deg)}} 
+		 {{:helper.link('+|', null, {'rate_control' : 1, value_name : max_deg})}}
+	{{/if}}
+{{ } }}
+
+<B><span class='highlight'>Generated power</span></B>: {{:data.last_power_gen}} W
+<BR>
+<B><span class='highlight'>Star Orientation</span></B>: {{:data.sun_angle}}&deg {{:data.sun_angle_txt}}
+<BR>
+<B><span class='highlight'>Array Orientation</span></B>: {{track_control_buttons('current_angle', (data.current_angle + '&deg'), 1, 15)}} ({{:data.current_angle_txt}})
+<BR>
+<B><span class='highlight'>Tracking:</span></B>
+<div class='statusDisplay'>
+	{{mode_btn('Off', 0, data.tracking_mode)}}{{mode_btn('Timed', 1, data.tracking_mode)}}{{mode_btn('Auto', 2, data.tracking_mode)}}
+	Tracking Rate: {{track_control_buttons('target_angle', (data.tracking_rate + ' deg/h ' + '(' + (data.tracking_rate < 0 ? 'CCW' : 'CW') + ')' ), 1, 30, 180)}}
+</div>
+<BR>
+<B><span class='highlight'>Connected devices:</span></B>
+<div class='statusDisplay'>
+	{{:helper.link('Search for devices', null, {'search_connected' : 1} )}}
+	<BR>
+	Solar panels : {{:data.nb_panels}} connected
+	<BR>
+	Solar tracker : {{:data.has_tracker ? '<span class=good>Found</span>' : '<span class=bad>Not found</span>' }}
+</div>
+<BR>
+{{:helper.link('Close', null, {'close' : 1} )}}
