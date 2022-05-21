@@ -48,6 +48,7 @@
 /decl/hierarchy/supply_pack/engineering/solar
 	name = "Power - Solar pack"
 	contains  = list(/obj/item/solar_assembly = 14,
+					/obj/item/storage/box/parts_pack/solar_cells = 4,
 					/obj/item/stock_parts/circuitboard/solar_control,
 					/obj/item/stock_parts/circuitboard/tracker_electronics,
 					/obj/item/paper/solar

@@ -14,3 +14,7 @@
 /obj/item/stock_parts/solar_cell/on_fail(obj/machinery/machine, damtype)
 	. = ..()
 	playsound(src, "shatter", 10, 1)
+
+/obj/item/storage/box/parts_pack/solar_cells
+	icon_state = "solar cells"
+	startswith = list(/obj/item/stock_parts/solar_cell = 7)
