@@ -112,7 +112,7 @@
 	return list(
 		/obj/item/solar_assembly = 14,
 		/obj/item/stock_parts/circuitboard/solar_control,
-		/obj/item/tracker_electronics,
+		/obj/item/stock_parts/circuitboard/tracker_electronics,
 		/obj/item/paper/solar
 	)
 

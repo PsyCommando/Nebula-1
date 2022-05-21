@@ -44,7 +44,7 @@ var/global/list/solars_list
 		/obj/item/stock_parts/solar_cell        = 2, //Since we don't use a board an we're built differently than everything else, we store our needed parts here
 	)
 	var/static/list/cached_overlays = list() //Contains frequently used overlays
-	frame_type                = /obj/structure/solar_assembly
+	frame_type                = /obj/item/solar_assembly
 	construct_state           = /decl/machine_construction/simple/assembled/solar
 	uncreated_component_parts = list(
 		/obj/item/stock_parts/power/terminal    = 1,
@@ -69,24 +69,22 @@ var/global/list/solars_list
 	)
 
 	stock_part_presets = list(
-		/decl/stock_part_preset/terminal_setup = 1,
-		/decl/stock_part_preset/radio/receiver = 1,
+		/decl/stock_part_preset/terminal_setup                = 1,
+		/decl/stock_part_preset/radio/receiver/solar          = 1,
 		/decl/stock_part_preset/radio/event_transmitter/solar = 1
 	)
 
-/obj/machinery/power/solar/buildable
-
 /obj/machinery/power/solar/Initialize()
 	. = ..()
-	LAZYDISTINCTADD(solars_list, src)
+	LAZYDISTINCTADD(global.solars_list, src)
 	if(global.sun)
 		//Event only for updating occlusion. Targeting of the panels is done through the solar control.
-		events_repository.register(/decl/observ/sun_position_changed, global.sun, src, .proc/on_sun_position_changed)
+		events_repository.register(/decl/observ/sun_position_changed, global.sun, src, /obj/machinery/power/solar/proc/on_sun_position_changed)
 
 /obj/machinery/power/solar/Destroy()
-	LAZYREMOVE(solars_list, src)
+	LAZYREMOVE(global.solars_list, src)
 	if(global.sun)
-		events_repository.unregister(/decl/observ/sun_position_changed, global.sun, src, .proc/on_sun_position_changed)
+		events_repository.unregister(/decl/observ/sun_position_changed, global.sun, src, /obj/machinery/power/solar/proc/on_sun_position_changed)
 	return ..()
 
 /obj/machinery/power/solar/RefreshParts()
@@ -100,9 +98,9 @@ var/global/list/solars_list
 	id_tag = "\ref[powernet]" //All solar devices on the same network have the network as id_tag
 	
 /obj/machinery/power/solar/disconnect_from_network()
-	report_disconnect()
 	if(!(. = ..()))
 		return
+	report_disconnect()
 	id_tag = null
 
 /obj/machinery/power/solar/Process()
@@ -146,12 +144,7 @@ var/global/list/solars_list
 	for(var/obj/item/stack/material/ST in bmat.materials)
 		ST.material.place_shard(loc)
 		ST.material.place_shard(loc)
-	if(istype(material))
-		material.place_shard(loc)
 	. = ..()
-
-/obj/machinery/power/solar_control/proc/on_sun_position_changed(var/new_angle)
-	update_occlusion()
 
 /**Cache the solar panel overlays */
 /obj/machinery/power/solar/proc/cache_solar_panel_overlays()
@@ -165,7 +158,7 @@ var/global/list/solars_list
 	if(B)
 		var/total_hp = 0
 		var/total_sheets = 0
-		for(var/obj/item/stack/material/ST in B.material)
+		for(var/obj/item/stack/material/ST in B.materials)
 			var/decl/material/M = ST.get_material()
 			if(M.opacity < 0.5)
 				total_hp += M.integrity
@@ -203,8 +196,16 @@ var/global/list/solars_list
 	sunfrac = cos(p_angle) ** 2
 	//isn't the power recieved from the incoming light proportionnal to cos(p_angle) (Lambert's cosine law) rather than cos(p_angle)^2 ?
 
-//trace towards sun to see if we're in shadow
+/**Callback proc for the /decl/observ/sun_position_changed event */
+/obj/machinery/power/solar/proc/on_sun_position_changed(var/new_angle)
+	update_occlusion()
+
+/**
+ * Trace towards sun to see if we're in shadow. 
+ * Fairly expensive to run.
+ */
 /obj/machinery/power/solar/proc/update_occlusion()
+	set waitfor = FALSE
 	var/steps  = SOLAR_OCCLUSION_CHECK_RANGE_SPACE	// 20 steps is enough
 	// On planets, we take fewer steps because the light is mostly up
 	// Also, many planets barely have any spots with enough clear space around
@@ -246,11 +247,17 @@ var/global/list/solars_list
 		return
 	T.queue_transmit(list("ACK" = src)) //Have to reply, so that the controller can tally up what's connected to it
 
+/**Sends to the controller a message when its been disconnected from the net, or disabled. */
 /obj/machinery/power/solar/proc/report_disconnect()
 	var/obj/item/stock_parts/radio/transmitter/T = get_component_of_type(/obj/item/stock_parts/radio/transmitter)
 	if(!istype(T))
 		return
 	T.queue_transmit(list("REM" = src))
+
+/**For setting the target angle directly */
+/obj/machinery/power/solar/proc/set_target_angle(var/new_angle)
+	var/decl/public_access/public_variable/target_solar_angle/VA = GET_DECL(/decl/public_access/public_variable/target_solar_angle)
+	VA.write_var(src, new_angle)
 
 ///////////////////////////////////////////////
 // Public Access
@@ -259,11 +266,11 @@ var/global/list/solars_list
 /**Var for receiving the desired angle the panels should turn to */
 /decl/public_access/public_variable/target_solar_angle
 	expected_type = /obj/machinery/power/solar
-	name = "target solar angle"
-	desc = "The angle the solar panel should turn to face."
-	can_write = TRUE
-	has_updates = TRUE
-	var_type = IC_FORMAT_NUMBER
+	name          = "target solar angle"
+	desc          = "The angle the solar panel should turn to face."
+	can_write     = TRUE
+	has_updates   = TRUE
+	var_type      = IC_FORMAT_NUMBER
 
 /decl/public_access/public_variable/solar_angle/write_var(obj/machinery/power/solar/machine, new_value)
 	. = ..()
@@ -285,18 +292,14 @@ var/global/list/solars_list
 
 /decl/stock_part_preset/radio/event_transmitter/solar
 	frequency = SOLARS_FREQ
-	event = /decl/public_access/public_variable/input_toggle
-	transmit_on_event = list(
-		"door_status" = /decl/public_access/public_variable/,
-	)
 
 /decl/stock_part_preset/radio/receiver/solar
 	frequency = SOLARS_FREQ
 	receive_and_write = list(
-		"set_solar_panel_angle" = /decl/public_access/public_variable/target_solar_angle,
+		SOLAR_TOPIC_UPDATE_PANEL_ANGLE = /decl/public_access/public_variable/target_solar_angle,
 	)
 	receive_and_call = list(
-		"assuming_direct_control" = /decl/public_access/public_method/solar_report_connected,
+		SOLAR_TOPIC_CONNECT = /decl/public_access/public_method/solar_report_connected,
 	)
 
 ///////////////////////////////////////////////

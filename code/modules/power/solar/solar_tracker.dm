@@ -50,6 +50,17 @@
 		events_repository.unregister(/decl/observ/sun_position_changed, global.sun, src, .proc/on_sun_position_changed)
 	return ..()
 	
+/obj/machinery/power/tracker/connect_to_network()
+	if(!(. = ..()))
+		return
+	id_tag = "\ref[powernet]" //All solar devices on the same network have the network as id_tag
+
+/obj/machinery/power/tracker/disconnect_from_network()
+	if(!(. = ..()))
+		return
+	report_disconnect()
+	id_tag = null
+
 /obj/machinery/power/tracker/proc/on_sun_position_changed(var/angle)
 	if(stat & BROKEN || !powernet || !global.sun)
 		return
@@ -61,7 +72,7 @@
 	set_dir(turn(NORTH, -angle) - 22.5)	// 22.5 deg bias ensures, e.g. 67.5-112.5 is EAST
 	queue_icon_update()
 
-/obj/machinery/power/tracker/proc/solar_tracker_report_connected(var/obj/machinery/machine)
+/obj/machinery/power/tracker/proc/report_connected(var/obj/machinery/machine)
 	if(!istype(machine))
 		return
 	//Grab the wired  powernet, not the wireless one
@@ -74,9 +85,17 @@
 		return
 	T.queue_transmit(list("ACK" = src)) //Have to reply, so that the controller can tally up what's connected to it
 
+/obj/machinery/power/tracker/proc/report_disconnect(var/obj/machinery/machine)
+	var/obj/item/stock_parts/radio/transmitter/T = get_component_of_type(/obj/item/stock_parts/radio/transmitter)
+	if(!istype(T))
+		return
+	T.queue_transmit(list("REM" = src))
+
 ///////////////////////////////////////////////
 // Variables
 ///////////////////////////////////////////////
+
+/**Variable where the last sun angle update is stored. */
 /decl/public_access/public_variable/sun_angle
 	name          = "sun angle"
 	desc          = "The angle of the nearest star from the tracker."
@@ -85,18 +104,18 @@
 	var_type      = IC_FORMAT_NUMBER
 	expected_type = /obj/machinery/power/tracker
 
-/decl/public_access/public_variable/sun_angle/access_var(obj/machinery/power/tracker/tracker)
-	return last_sun_angle
+/decl/public_access/public_variable/sun_angle/access_var(obj/machinery/power/tracker/machine)
+	return machine.last_sun_angle
 
-/decl/public_access/public_variable/sun_angle/write_var(obj/machinery/power/tracker/tracker, new_value)
+/decl/public_access/public_variable/sun_angle/write_var(obj/machinery/power/tracker/machine, new_value)
 	. = ..()
 	if(.)
-		last_sun_angle = new_value
+		machine.last_sun_angle = new_value
 
 /decl/public_access/public_method/solar_tracker_report_connected
 	name = "acknowledged"
 	desc = "Called with the machine's reference when it acknowledges its connected to us."
-	call_proc = /obj/machinery/power/tracker/proc/solar_tracker_report_connected
+	call_proc = /obj/machinery/power/tracker/proc/report_connected
 
 ///////////////////////////////////////////////
 // Presets
@@ -110,5 +129,5 @@
 /decl/stock_part_preset/radio/receiver/solar_tracker
 	frequency = SOLARS_FREQ
 	receive_and_call = list(
-		"assuming_direct_control" = /decl/public_access/public_method/solar_tracker_report_connected,
+		SOLAR_TOPIC_CONNECT = /decl/public_access/public_method/solar_tracker_report_connected,
 	)

@@ -1,3 +1,5 @@
+#define SOLAR_TOPIC_UPDATE_PANEL_ANGLE "set_solar_panel_angle"
+#define SOLAR_TOPIC_CONNECT "assuming_direct_control"
 #define SOLAR_CONTROL_TRACKING_OFF   0 //No auto tracking, no timed tracking
 #define SOLAR_CONTROL_TRACKING_TIMED 1 //Timed tracking only
 #define SOLAR_CONTROL_TRACKING_AUTO  2 //Automated tracking using tracker
@@ -45,17 +47,22 @@
 
 	var/current_angle     = 0                           //The angle the controller is asking solar panels to be facing
 	var/target_angle      = 0                           // target angle in manual tracking (since it updates every game minute)
-	var/gen               = 0                           //Power generated this tick
-	var/lastgen           = 0                           //Power generated last tick
 	var/track_mode        = SOLAR_CONTROL_TRACKING_OFF  // 0= off  1=timed  2=auto (tracker)
 	var/track_rate        = 60 SECONDS                  //Delay between tracking updates
 	var/next_timed_update = 0                           // time for a panel to rotate of 1° in manual tracking
 	var/nb_panels         = 0                           //Panels that answered the last roll call
 	var/has_tracker       = 0                           //Whether a tracker answered the last roll call. 
+	var/time_next_search  = 0                           //The time after which we're allowed too start another panel search. Tries to limit doing a ton of checks over a small time period
 
 // Used for mapping in solar array which automatically starts itself (telecomms, for example)
 /obj/machinery/computer/solar_control/autostart
 	track_mode = SOLAR_CONTROL_TRACKING_AUTO
+
+/obj/machinery/computer/solar_control/power_change()
+	. = ..()
+	if(REALTIMEOFDAY > time_next_search && operable())
+		addtimer(CALLBACK(src, /obj/machinery/computer/solar_control/proc/search_for_connected), 1 SECOND)
+		time_next_search = REALTIMEOFDAY + 10 SECOND //Wait at least 10 seconds before the next
 
 /obj/machinery/computer/solar_control/drain_power()
 	return -1
@@ -63,6 +70,7 @@
 //search for unconnected panels and trackers in the computer powernet and connect them
 /obj/machinery/computer/solar_control/proc/search_for_connected()
 	nb_panels = 0
+	has_tracker = 0
 	var/obj/item/stock_parts/power/terminal/term = get_component_of_type(/obj/item/stock_parts/power/terminal)
 	if(!term?.terminal)
 		return
@@ -73,7 +81,7 @@
 	if(!trans)
 		return
 	//Tell the other solar machines on the network we're taking control
-	trans.queue_transmit(list("assuming_direct_control" = src))
+	trans.queue_transmit(list(SOLAR_TOPIC_CONNECT = src))
 
 /obj/machinery/computer/solar_control/interface_interact(mob/user)
 	ui_interact(user)
@@ -81,7 +89,9 @@
 
 /obj/machinery/computer/solar_control/ui_data(mob/user, ui_key)
 	. = ..()
-	.["last_power_gen"]    = round(lastgen)
+	var/obj/item/stock_parts/power/terminal/T = get_component_of_type(/obj/item/stock_parts/power/terminal)
+	if(T?.terminal?.powernet)
+		.["last_power_gen"] = round(T.terminal.powernet.newavail)
 	.["sun_angle"]         = global.sun.angle
 	.["sun_angle_txt"]     = angle2text(global.sun.angle)
 	.["current_angle"]     = current_angle
@@ -121,19 +131,17 @@
 /obj/machinery/computer/solar_control/proc/set_track_mode(var/new_mode)
 	track_mode = new_mode
 	if(track_mode == SOLAR_CONTROL_TRACKING_AUTO && has_tracker)
-		var/decl/public_access/public_variable/solar_control_requested_angle/TA = GET_DECL(/decl/public_access/public_variable/solar_control_requested_angle)
-		TA.write_var(src, current_angle)
+		force_update_panel_angle()
 		next_timed_update = -1
 
 	else if (track_mode == SOLAR_CONTROL_TRACKING_TIMED) //begin manual tracking
-		var/decl/public_access/public_variable/solar_control_requested_angle/TA = GET_DECL(/decl/public_access/public_variable/solar_control_requested_angle)
-		TA.write_var(src, current_angle)
+		force_update_panel_angle()
 		schedule_next_tracking_update()
 	
 	else
 		next_timed_update = -1
 		
-/obj/machinery/computer/solar_control/Topic(href, href_list)
+/obj/machinery/computer/solar_control/OnTopic(mob/user, href_list, datum/topic_state/state)
 	. = ..()
 	if(href_list["close"] )
 		SSnano.close_user_uis(usr, src, "main")
@@ -141,33 +149,26 @@
 
 	if(href_list["rate_control"])
 		set_rate_control(href_list["current_angle"] ? text2num(href_list["current_angle"]) : null, href_list["target_angle"] ? text2num(href_list["target_angle"]) : null )
+		return TOPIC_REFRESH
 
 	if(href_list["track_mode"])
 		set_track_mode(text2num(href_list["track_mode"]))
+		return TOPIC_REFRESH
 
 	if(href_list["search_connected"])
 		search_for_connected()
 		if(has_tracker && track_mode == SOLAR_CONTROL_TRACKING_AUTO)
-			has_tracker.set_angle(global.sun.angle)
-		src.set_panels(current_angle)
-
-	interact(usr)
-	return 1
-
+			force_update_panel_angle()
+		return TOPIC_REFRESH
+	
 /obj/machinery/computer/solar_control/Process()
-	lastgen = gen
-	gen = 0
-
 	if(stat & (NOPOWER | BROKEN))
 		return
 
-	if( track_mode == SOLAR_CONTROL_TRACKING_TIMED && \
-		track_rate &&\
-		next_timed_update >= 0 &&\
-		next_timed_update <= REALTIMEOFDAY)
-			target_angle = ((target_angle + (track_rate / abs(track_rate))) + 360) % 360
-			current_angle = target_angle
-			schedule_next_tracking_update() //reset the counter for the next 1°
+	if( track_mode == SOLAR_CONTROL_TRACKING_TIMED && track_rate && (next_timed_update >= 0 && next_timed_update <= REALTIMEOFDAY))
+		target_angle = ((target_angle + (track_rate / abs(track_rate))) + 360) % 360
+		current_angle = target_angle
+		schedule_next_tracking_update() //reset the counter for the next 1°
 
 /obj/machinery/computer/solar_control/proc/acknowledge_connection(var/obj/machinery/power/solar/P)
 	if(istype(P))
@@ -182,6 +183,11 @@
 		P.set_target_angle(current_angle) //Update their angle on connect directly
 	if(istype(P, /obj/machinery/power/tracker))
 		has_tracker = max(0, has_tracker - 1) //Report if we got a tracker
+
+/**Since writing the same value into public var won't trigger an update, we can transmit the angle this way */
+/obj/machinery/computer/solar_control/proc/force_update_panel_angle()
+	var/obj/item/stock_parts/radio/transmitter/T = get_component_of_type(/obj/item/stock_parts/radio/transmitter)
+	T.queue_transmit(list(SOLAR_TOPIC_UPDATE_PANEL_ANGLE = current_angle))	
 
 ///////////////////////////////////////////////
 // Public Access
@@ -224,12 +230,12 @@
 /decl/public_access/public_method/solar_control_ack
 	name      = "acknowledged"
 	desc      = "Called with the machine's reference when it acknowledges its connected to us."
-	call_proc = /obj/machinery/computer/solar/proc/acknowledge_connection
+	call_proc = /obj/machinery/computer/solar_control/proc/acknowledge_connection
 
 /decl/public_access/public_method/solar_control_rem
 	name      = "removed"
 	desc      = "Called with the machine's reference when it has to disconnect from us for any reasons."
-	call_proc = /obj/machinery/computer/solar/proc/acknowledge_disconnection
+	call_proc = /obj/machinery/computer/solar_control/proc/acknowledge_disconnection
 
 ///////////////////////////////////////////////
 // Presets
@@ -247,7 +253,7 @@
 /decl/stock_part_preset/radio/basic_transmitter/solar_control
 	frequency          = SOLARS_FREQ
 	transmit_on_change = list(
-		"set_solar_panel_angle" = /decl/public_access/public_variable/solar_control_requested_angle, //Emit this var when it changes
+		SOLAR_TOPIC_UPDATE_PANEL_ANGLE = /decl/public_access/public_variable/solar_control_requested_angle, //Emit this var when it changes
 	)
 
 #undef SOLAR_CONTROL_TRACKING_OFF

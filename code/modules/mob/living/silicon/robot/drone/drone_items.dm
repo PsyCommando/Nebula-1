@@ -12,7 +12,7 @@
 	var/list/can_hold = list(
 		/obj/item/cell,
 		/obj/item/stock_parts/circuitboard/airlock_electronics,
-		/obj/item/tracker_electronics,
+		/obj/item/stock_parts/circuitboard/tracker_electronics,
 		/obj/item/stock_parts,
 		/obj/item/frame,
 		/obj/item/frame/camera/kit,

@@ -51,7 +51,7 @@
 	antag_text = "Practice somewhere quietly out of the way and learn the wires you need before doing it for real."
 
 /datum/codex_entry/solars
-	associated_paths = list(/obj/item/solar_assembly, /obj/machinery/power/solar, /obj/machinery/power/tracker, /obj/machinery/power/solar_control)
+	associated_paths = list(/obj/item/solar_assembly, /obj/machinery/power/solar, /obj/machinery/power/tracker, /obj/machinery/computer/solar_control)
 	associated_strings = list("solar array")
 	lore_text = "'At Greencorps we love the environment, and space. With this package you are able to help mother nature and produce energy without any usage of fossil fuels! Singularity energy is dangerous while solar energy is safe, which is why it's better. Now here is how you setup your own solar array...''"
 	mechanics_text = "A solar array is a source of power for your ship or station, utalizing a series of panels on the outside of the ship/station. A computer console is used to control the array, with the help of a solar tracker.<BR> \

@@ -88,7 +88,7 @@
 								/obj/item/cell/high                               = TRADER_THIS_TYPE,
 								/obj/item/cell/super                              = TRADER_THIS_TYPE,
 								/obj/item/cell/hyper                              = TRADER_THIS_TYPE,
-								/obj/item/tracker_electronics                     = TRADER_THIS_TYPE)
+								/obj/item/stock_parts/circuitboard/tracker_electronics                     = TRADER_THIS_TYPE)
 
 
 /* Clothing stores: each a different type. A hat/glove store, a shoe store, and a jumpsuit store. */
