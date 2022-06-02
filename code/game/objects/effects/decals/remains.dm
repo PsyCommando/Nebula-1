@@ -5,6 +5,9 @@
 	icon_state = "remains"
 	anchored = 0
 
+/obj/item/remains/is_burnable()
+	return FALSE
+	
 /obj/item/remains/human
 	desc = "They look like human remains. They have a strange aura about them."
 

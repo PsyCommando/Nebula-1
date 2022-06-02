@@ -12,6 +12,9 @@
 	icon = 'icons/obj/objects.dmi'
 	icon_state = "ash"
 
+/obj/effect/decal/cleanable/ash/is_burnable()
+	return FALSE
+
 /obj/effect/decal/cleanable/ash/attack_hand(var/mob/user)
 	to_chat(user, "<span class='notice'>[src] sifts through your fingers.</span>")
 	var/turf/simulated/floor/F = get_turf(src)
