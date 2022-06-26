@@ -1,5 +1,6 @@
 #define BEE_SMOKE_TIME (10 SECONDS)
 #define BEE_RANGE 7 //Maximum range the beehive looks for plants
+var/global/list/bee_food_reagents = list(/decl/material/liquid/nutriment/honey, /decl/material/liquid/nutriment/pollen) //Actually relevant food to the bees
 
 ////////////////////////////////////////////////////////
 // Beehive
@@ -16,14 +17,27 @@
 	parts_amount             = 1
 	material                 = /decl/material/solid/wood
 	var/open                 = FALSE //Whether the lid of the hive is open
-	var/bee_count            = 0
-	var/tmp/max_bee_count    = 100
-	var/honeycombs           = 0 // Percent
-	var/tmp/notthebees       = null //Someone is currently re-enacting a scene from wickerman
-	var/tmp/maxFrames        = 5 //The maximum amount of honey frames we can contain
-	var/tmp/time_last_search = 0 //The time we last checked for the nearest plants.
-	var/tmp/time_end_smoked  = 0 //The time when the smoked status ends or 0
-	var/list/frames              //A list of honey frames we contain
+	var/bee_count            = 0     //The current count of worker bees in this hive
+	var/tmp/max_bee_count    = 100   //The maximum amount of worker bees in this hive
+	var/tmp/mob/notthebees   = null  //Someone is currently re-enacting a scene from wickerman
+	var/tmp/time_end_smoked  = 0     //The time when the smoked status ends or 0
+	var/tmp/max_frames       = 5     //The maximum number of frames this hive may contain. IRL hives have from 10 to 8 frames.
+	var/list/frames                  //A list of honey frames we contain
+
+	//Timed checks
+	var/tmp/time_no_air_since   = null //The time when we began lacking a good atmosphere since or null
+	var/tmp/time_starving_since = null //The time we began starving at or null
+	var/tmp/time_laid_eggs      = null //The time we last increase our population
+
+	//Suitability
+	var/tmp/time_bee_gestate   = 1 MINUTE   //The time between bee increases
+	var/tmp/time_no_food_max   = 5 MINUTES  //Time the bees can surive without food without taking damage
+	var/tmp/time_bad_atmos_max = 10 MINUTES //Insects have a very efficient breathing system, and can keep oxygen stored for hours and days.
+	var/tmp/min_pressure       = 50         //kPa Insects can tolerate vacuum, but probably can't fly under a certain pressure in gravity
+	var/tmp/max_pressure       = 200        //kPa Max pressure the bees can take before taking damage.
+	var/tmp/min_temp           = T0C        //K Min temp the bees can sustain without damage
+	var/tmp/max_temp           = T0C + 50   //K Max temp the bees can sustain without damage
+	var/tmp/min_oxygen         = 5          //% The percentage of oxygenation under which bees start suffocating
 
 	var/tmp/datum/proximity_trigger/prox_listener  //Proximity check for telling what enters our effective range
 	var/tmp/list/nearby_plants                      //List of cached nearby plant refs
@@ -178,8 +192,105 @@
 	if((REALTIMEOFDAY > time_end_smoked) && bee_count)
 		//#TODO: I just left this as it is, but it seems like this processes too fast, and is generally really gross
 		pollinate_flowers()
-		bee_count = min(bee_count * 1.005, max_bee_count) //Bees count just increases super fast to 100
+		handle_reproduction()
 		update_icon()
+
+/**Produce a list of nearby plants or cache them. The list format is /atom = /weakref  */
+/obj/structure/beehive/proc/list_nearby_plants(var/force_update = FALSE)
+	if(!LAZYLEN(nearby_plants) || force_update)
+		if(force_update)
+			//If we had things already, make sure to de-register them
+			for(var/key in nearby_plants)
+				var/weakref/W = nearby_plants[key]
+				var/obj/machinery/portable_atmospherics/hydroponics/H = W?.resolve()
+				if(istype(H))
+					atom_left_range(H)
+			LAZYCLEARLIST(nearby_plants)
+
+		//Then we can add the things from the prox listener
+		for(var/turf/T in prox_listener.turfs_in_range)
+			for(var/obj/machinery/portable_atmospherics/hydroponics/H in T)
+				atom_in_range(H) //Do the proper setup for our watched plant list
+	return nearby_plants
+
+/**Whether a given plant is a valid target to process by bees*/
+/obj/structure/beehive/proc/is_plant_valid(var/obj/machinery/portable_atmospherics/hydroponics/H)
+	return H.seed?.can_pollinate() && !H.dead
+
+/obj/structure/beehive/proc/is_atmos_suitable(var/turf/T)
+	var/datum/gas_mixture/cur_air = T?.return_air()
+	if(!cur_air)
+		return
+	if(cur_air.temperature < min_temp || cur_air.temperature > max_temp)
+		return
+	var/pressure = cur_air.return_pressure()
+	if(pressure < min_pressure || pressure > max_pressure)
+		return
+	var/percent_oxy = (cur_air.get_gas(/decl/material/gas/oxygen) * 100) / cur_air.get_total_moles()
+	if(percent_oxy < min_oxy)
+		return
+	return TRUE
+
+/obj/structure/beehive/proc/calculate_total_food()
+	var/total_food_units = 0
+	for(var/obj/item/honey_frame/H in frames)
+		for(var/rtype in global.bee_food_reagents)
+			if(H.reagents.has_reagent(rtype))
+				total_food_units += REAGENT_VOLUME(H.reagents, rtype)
+	return total_food_units
+
+/**Handles population increases and decreases in the hive. */
+/obj/structure/beehive/proc/handle_population()
+	if(bee_count <= 0)
+		return
+
+	//Check atmosphere
+	var/turf/T = get_turf(src)
+	var/bee_diff = 0
+	var/atmos_ok = is_atmos_suitable(T)
+	if(!atmos_ok)
+		if(isnull(time_no_air_since))
+			time_no_air_since = REALTIMEOFDAY
+		else if((REALTIMEOFDAY - time_no_air_since) >= time_bad_atmos_max)
+			bee_diff -= (bee_count * 0.10) //Kill off some when we don't have the proper atmos
+
+	//Deal with food upkeep
+	var/last_food_units = handle_food_stockpile()
+	
+	//If we got food, and the atmosphere is alright reproduce, otherwise decline
+	if(last_food_units > 0 && atmos_ok)
+		time_starving_since = null
+		//Bee births
+		if((REALTIMEOFDAY - time_laid_eggs) >= time_bee_gestate)
+			time_laid_eggs = REALTIMEOFDAY
+			bee_diff += rand(2, 10)
+
+	else if(last_food_units <= 0)
+		//Begin starving
+		if(isnull(time_starving_since))
+			time_starving_since = REALTIMEOFDAY
+		else if((REALTIMEOFDAY - time_starving_since) >= 2 MINUTES) 
+			bee_diff -= rand(1, 5) 	//Remove some bees if they've been starving for a while
+			time_starving_since = null
+	
+	//Apply population change
+	bee_count = between(0, bee_count + round(bee_diff), max_bee_count)
+	if(bee_diff != 0)
+		update_icon()
+
+/obj/structure/beehive/proc/handle_food_stockpile()
+	//Generate food from flowering plants around
+	if((REALTIMEOFDAY - time_last_harvest) >= foraging_interval)
+		var/list/nearby = list_nearby_plants()
+		for(var/key in nearby)
+			var/weakref/W = nearby[key]
+			var/obj/machinery/portable_atmospherics/hydroponics/H = W.resolve()
+
+		time_last_harvest = REALTIMEOFDAY
+
+	//Feed all workers
+	//Turn leftovers into honey
+	return 
 
 /obj/structure/beehive/proc/pollinate_flowers()
 	var/coef = bee_count / 100
