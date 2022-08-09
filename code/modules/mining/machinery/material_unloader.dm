@@ -2,6 +2,7 @@
 	name = "ore unloader"
 	icon_state = "unloader"
 	use_ui_template = "material_processing_unloader.tmpl"
+	stat_immune = NOINPUT | NOSCREEN
 
 #define MAX_UNLOAD_TURF_CONTENTS 15
 #define MAX_UNLOAD_ORE_PER_TICK  10
