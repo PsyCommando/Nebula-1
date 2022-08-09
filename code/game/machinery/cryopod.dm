@@ -180,7 +180,6 @@
 
 	construct_state = /decl/machine_construction/default/panel_closed
 	uncreated_component_parts = null
-	stat_immune = 0
 	var/open_sound = 'sound/machines/podopen.ogg'
 	var/close_sound = 'sound/machines/podclose.ogg'
 
