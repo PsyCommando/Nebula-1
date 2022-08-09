@@ -324,6 +324,7 @@
 	. = ..()
 
 /obj/machinery/door/blast/regular/open
+	icon_state = "pdoor0"
 	begins_closed = FALSE
 
 // SUBTYPE: Shutters
