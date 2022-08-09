@@ -21,7 +21,6 @@
 	var/update_locked = 0
 
 	construct_state = /decl/machine_construction/default/panel_closed
-	stat_immune = 0
 	uncreated_component_parts = null
 	base_type = /obj/machinery/power/breakerbox
 
