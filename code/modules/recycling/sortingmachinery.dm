@@ -518,4 +518,4 @@
 	uses_charge = 1
 	charge_costs = list(1)
 	stack_merge_type = /obj/item/stack/package_wrap
-	health = ITEM_HEALTH_NO_DAMAGE
+	max_health = ITEM_HEALTH_NO_DAMAGE
