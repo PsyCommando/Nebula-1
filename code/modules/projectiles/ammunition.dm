@@ -171,7 +171,28 @@
 	update_icon()
 
 /obj/item/ammo_magazine/attackby(obj/item/W, mob/user)
+	if(get_stack_type() && istype(W, get_stack_type()))
+		var/obj/item/stackable_holder/H = W
+		if(length(stored_ammo) < 1)
+			//Dump it all back in
+			for(var/obj/item/I in H.contents)
+				attackby(I, user) //#TODO: Handle inserting/removing separately plz + add option not to spam text
+		else
+			//Just keep pulling rounds out!
+			var/obj/item/ammo_casing/C = stored_ammo[stored_ammo.len]
+			if(H.put_thing(C, user))
+				stored_ammo -= C
+				update_icon()
+		return TRUE
+
 	if(istype(W, /obj/item/ammo_casing))
+		if(length(stored_ammo))
+			var/obj/item/ammo_casing/C = stored_ammo[stored_ammo.len]
+			if(W.create_stack_with(C, user))
+				stored_ammo -= C
+				update_icon()
+			else
+				return TRUE
 		var/obj/item/ammo_casing/C = W
 		if(C.caliber != caliber)
 			to_chat(user, "<span class='warning'>[C] does not fit into [src].</span>")
@@ -183,6 +204,7 @@
 			return
 		stored_ammo.Add(C)
 		update_icon()
+		return TRUE
 	else ..()
 
 /obj/item/ammo_magazine/attack_self(mob/user)
@@ -208,8 +230,7 @@
 			user.visible_message("\The [user] removes \a [C] from [src].", "<span class='notice'>You remove \a [C] from [src].</span>")
 			update_icon()
 	else
-		..()
-		return
+		return ..()
 
 /obj/item/ammo_magazine/on_update_icon()
 	. = ..()
