@@ -12,10 +12,10 @@
 	throw_range = 5
 	origin_tech = "{'materials':1}"
 	material = /decl/material/solid/metal/steel
-	max_health = ITEM_HEALTH_NO_DAMAGE //#TODO: Once we can work out something different for handling cuff breakout, change this. Since it relies on cuffs health to tell if you can actually breakout.
 	var/elastic
-	var/dispenser = 0
+	var/dispenser = FALSE //#TODO: Probably should make the cuffs dispenser a standalone item for borgs?
 	var/breakouttime = 2 MINUTES //Deciseconds = 120s = 2 minutes
+	var/breakout_wear = FALSE //Whether the cuffs will take wear damage and allow breaking out of off.
 	var/cuff_sound = 'sound/weapons/handcuffs.ogg'
 	var/cuff_type = "handcuffs"
 
@@ -25,26 +25,17 @@
 		S.remove_cuffs()
 	. = ..()
 
-/obj/item/handcuffs/physically_destroyed(skip_qdel)
-	if(istype(loc, /obj/item/clothing/shoes))
+/obj/item/handcuffs/physically_destroyed(skip_qdel, no_debris, quiet)
+	if(!quiet && istype(loc, /obj/item/clothing/shoes))
 		loc.visible_message(SPAN_WARNING("\The [src] attached to \the [loc] snap and fall away!"), range = 1)
 	. = ..()
 
-/obj/item/handcuffs/examine(mob/user)
-	. = ..()
-	if (health > 0 && max_health > 0)
-		var display = health / max_health * 100
-		if (display > 66)
-			return
-		to_chat(user, SPAN_WARNING("They look [display < 33 ? "badly ": ""]damaged."))
-
 /obj/item/handcuffs/attack(var/mob/living/carbon/C, var/mob/living/user)
-
 	if(!user.check_dexterity(DEXTERITY_COMPLEX_TOOLS))
 		return
 
 	if ((MUTATION_CLUMSY in user.mutations) && prob(50))
-		to_chat(user, "<span class='warning'>Uh ... how do those things work?!</span>")
+		to_chat(user, SPAN_WARNING("Uh ... how do those things work?!"))
 		place_handcuffs(user, user)
 		return
 
@@ -52,48 +43,47 @@
 	if(istype(C))
 		if(!C.get_equipped_item(slot_handcuffed_str))
 			if (C == user)
-				place_handcuffs(user, user)
-				return
+				return place_handcuffs(user, user)
 
 			//check for an aggressive grab (or robutts)
 			if(C.has_danger_grab(user))
-				place_handcuffs(C, user)
+				return place_handcuffs(C, user)
 			else
-				to_chat(user, "<span class='danger'>You need to have a firm grip on [C] before you can put \the [src] on!</span>")
+				to_chat(user, SPAN_DANGER("You need to have a firm grip on [C] before you can put \the [src] on!"))
 		else
-			to_chat(user, "<span class='warning'>\The [C] is already handcuffed!</span>")
-	else
-		..()
+			to_chat(user, SPAN_WARNING("\The [C] is already handcuffed!"))
+		return FALSE
+	return ..()
 
 /obj/item/handcuffs/proc/place_handcuffs(var/mob/living/carbon/target, var/mob/user)
 	playsound(src.loc, cuff_sound, 30, 1, -2)
 
 	var/mob/living/carbon/human/H = target
 	if(!istype(H))
-		return 0
+		return FALSE
 
 	if (!H.has_organ_for_slot(slot_handcuffed_str))
-		to_chat(user, "<span class='danger'>\The [H] needs at least two wrists before you can cuff them together!</span>")
-		return 0
+		to_chat(user, SPAN_DANGER("\The [H] needs at least two wrists before you can cuff them together!"))
+		return FALSE
 
 	var/obj/item/gloves = H.get_equipped_item(slot_gloves_str)
 	if((gloves && (gloves.item_flags & ITEM_FLAG_NOCUFFS)) && !elastic)
-		to_chat(user, "<span class='danger'>\The [src] won't fit around \the [gloves]!</span>")
-		return 0
+		to_chat(user, SPAN_DANGER("\The [src] won't fit around \the [gloves]!"))
+		return FALSE
 
-	user.visible_message("<span class='danger'>\The [user] is attempting to put [cuff_type] on \the [H]!</span>")
+	user.visible_message(SPAN_DANGER("\The [user] is attempting to put [cuff_type] on \the [H]!"))
 
 	if(!do_after(user,30, target))
-		return 0
+		return FALSE
 
 	if(!target.has_danger_grab(user)) // victim may have resisted out of the grab in the meantime
-		return 0
+		return FALSE
 
 	var/obj/item/handcuffs/cuffs = src
 	if(dispenser)
 		cuffs = new(get_turf(user))
 	else if(!user.unEquip(cuffs))
-		return 0
+		return FALSE
 
 	admin_attack_log(user, H, "Attempted to handcuff the victim", "Was target of an attempted handcuff", "attempted to handcuff")
 	SSstatistics.add_field_details("handcuffs","H")
@@ -101,11 +91,89 @@
 	user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
 	user.do_attack_animation(H)
 
-	user.visible_message("<span class='danger'>\The [user] has put [cuff_type] on \the [H]!</span>")
+	user.visible_message(SPAN_DANGER("\The [user] has put [cuff_type] on \the [H]!"))
 
 	// Apply cuffs.
 	target.equip_to_slot(cuffs, slot_handcuffed_str)
-	return 1
+	return TRUE
+
+/obj/item/handcuffs/proc/escape_handcuffs(var/mob/living/carbon/C, var/breakout_time_modifier = 1.0)
+	if(C.can_break_cuffs()) //Don't want to do a lot of logic gating here.
+		return break_handcuffs(C)
+	var/timebreak = breakouttime * max(0.25, breakout_time_modifier) //minimum is 1/4th of the time
+
+	C.visible_message(
+		SPAN_DANGER("\The [C] attempts to remove \the [src]!"),
+		SPAN_WARNING("You attempt to remove \the [src] (This will take around [timebreak / (1 SECOND)] second\s and you need to stand still)."),
+		range = 2
+		)
+
+	var/stages = 4
+	for(var/i = 1 to stages)
+		if(do_after(C, timebreak * 0.25, incapacitation_flags = INCAPACITATION_DEFAULT & ~INCAPACITATION_RESTRAINED))
+			if(QDELETED(C) || QDELETED(src) || (C.get_equipped_item(slot_handcuffed_str) != src) || C.buckled)
+				return FALSE
+			C.visible_message(
+				SPAN_WARNING("\The [C] fiddles with \the [src]."),
+				SPAN_WARNING("You try to slip free of \the [src] ([i*100/stages]% done)."),
+				range = 2
+				)
+		else
+			if(QDELETED(C) || QDELETED(src) || (C.get_equipped_item(slot_handcuffed_str) != src) || C.buckled)
+				return FALSE
+			C.visible_message(
+				SPAN_WARNING("\The [C] stops fiddling with \the [src]."),
+				SPAN_WARNING("You stop trying to slip free of \the [src]."),
+				range = 2
+				)
+			return FALSE
+		if(QDELETED(C) || QDELETED(src) || (C.get_equipped_item(slot_handcuffed_str) != src) || C.buckled)
+			return FALSE
+
+	if(breakout_wear && can_take_damage() && (health > 0)) // Improvised cuffs can break because their health is > 0
+		take_damage(max_health / 2)
+		if(QDELETED(src))
+			C.visible_message(
+				SPAN_DANGER("\The [C] manages to remove \the [src], breaking them!"),
+				SPAN_NOTICE("You successfully remove \the [src], breaking them!"),
+				range = 2
+				)
+			if(C.buckled && C.buckled.buckle_require_restraints)
+				C.buckled.unbuckle_mob()
+			C.update_inv_handcuffed()
+			return TRUE
+
+	visible_message(
+		SPAN_WARNING("\The [C] manages to remove \the [src]!"),
+		SPAN_NOTICE("You successfully remove \the [src]!"),
+		range = 2
+		)
+	C.drop_from_inventory(src)
+	return TRUE
+
+/obj/item/handcuffs/proc/break_handcuffs(var/mob/living/carbon/C)
+	C.visible_message(
+		SPAN_DANGER("[C] is trying to break \the [src]!"),
+		SPAN_WARNING("You attempt to break your [src]. (This will take around 5 seconds and you need to stand still)"),
+		range = 2
+		)
+
+	if(do_after(C, 5 SECONDS, incapacitation_flags = INCAPACITATION_DEFAULT & ~INCAPACITATION_RESTRAINED))
+		if(QDELETED(C) || QDELETED(src) || (C.get_equipped_item(slot_handcuffed_str) != src) || C.buckled)
+			return FALSE
+
+		C.visible_message(
+			SPAN_DANGER("[C] manages to break \the [src]!"),
+			SPAN_WARNING("You successfully break your [src]."),
+			range = 2
+		)
+
+		C.unEquip(src)
+		physically_destroyed()
+		if(C.buckled && C.buckled.buckle_require_restraints)
+			C.buckled.unbuckle_mob()
+		return TRUE
+	return FALSE
 
 var/global/last_chew = 0 //#FIXME: Its funny how only one person in the world can chew their restraints every 2.6 seconds
 /mob/living/carbon/human/RestrainedClickOn(var/atom/A)
@@ -132,14 +200,17 @@ var/global/last_chew = 0 //#FIXME: Its funny how only one person in the world ca
 
 	last_chew = world.time
 
+////////////////////////////////////////////////////////////////
+// Hancuffs - Cable Coils
+////////////////////////////////////////////////////////////////
 /obj/item/handcuffs/cable
 	name = "cable restraints"
 	desc = "Looks like some cables tied together. Could be used to tie something up."
 	icon = 'icons/obj/items/handcuffs_cable.dmi'
-	breakouttime = 300 //Deciseconds = 30s
+	breakouttime = 30 SECONDS //Deciseconds = 30s
 	cuff_sound = 'sound/weapons/cablecuff.ogg'
 	cuff_type = "cable restraints"
-	elastic = 1
+	elastic = TRUE
 	max_health = 75
 	material = /decl/material/solid/plastic
 
@@ -168,15 +239,18 @@ var/global/last_chew = 0 //#FIXME: Its funny how only one person in the world ca
 	color = COLOR_SILVER
 
 /obj/item/handcuffs/cyborg
-	dispenser = 1
+	dispenser = TRUE
 
+////////////////////////////////////////////////////////////////
+// Hancuffs - Tape Restraints
+////////////////////////////////////////////////////////////////
 /obj/item/handcuffs/cable/tape
 	name = "tape restraints"
 	desc = "DIY!"
 	icon_state = "tape_cross"
 	item_state = null
 	icon = 'icons/obj/bureaucracy.dmi'
-	breakouttime = 200
+	breakouttime = 20 SECONDS
 	cuff_type = "duct tape"
 	max_health = 50
 	material = /decl/material/solid/plastic

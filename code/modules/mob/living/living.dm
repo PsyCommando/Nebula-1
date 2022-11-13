@@ -1096,3 +1096,6 @@ default behaviour is:
 
 /mob/living/get_speech_bubble_state_modifier()
 	return isSynthetic() ? "synth" : ..()
+
+/mob/living/proc/can_break_cuffs()
+	return FALSE
