@@ -16,7 +16,6 @@
 
 	handle_generic_blending = TRUE
 	material_alteration = MAT_FLAG_ALTERATION_COLOR | MAT_FLAG_ALTERATION_NAME
-	maxhealth = 20
 
 	var/destroyed = 0
 	var/list/connections

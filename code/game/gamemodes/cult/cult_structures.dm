@@ -92,9 +92,11 @@
 	icon = 'icons/obj/cult.dmi'
 	icon_state = "hole"
 	density = 1
-	unacidable = 1
 	anchored = 1.0
 	var/spawnable = null
+
+/obj/effect/gateway/acid_act(decl/material/acid, exposed_volume)
+	return
 
 /obj/effect/gateway/active
 	light_range=5

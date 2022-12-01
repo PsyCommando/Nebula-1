@@ -49,7 +49,6 @@
 	icon_state = "airlock_control_off"
 	power_channel = ENVIRON
 	density = 0
-	unacidable = 1
 	obj_flags = OBJ_FLAG_MOVES_UNSUPPORTED
 	var/frequency = EXTERNAL_AIR_FREQ
 	var/datum/radio_frequency/radio_connection
@@ -64,6 +63,9 @@
 	. = ..()
 	set_frequency(frequency)
 	set_extension(src, /datum/extension/interactive/multitool/embedded_controller)
+
+/obj/machinery/embedded_controller/radio/acid_act(decl/material/acid, exposed_volume)
+	return
 
 /obj/machinery/embedded_controller/radio/Destroy()
 	if(radio_controller)

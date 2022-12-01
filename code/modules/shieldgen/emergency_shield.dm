@@ -7,8 +7,7 @@
 	opacity = 0
 	anchored = 1
 	unacidable = 1
-	var/const/max_health = 200
-	var/health = max_health //The shield can only take so much beating (prevents perma-prisons)
+	max_health = 200 //The shield can only take so much beating (prevents perma-prisons)
 	var/shield_generate_power = 7500	//how much power we use when regenerating
 	var/shield_idle_power = 1500		//how much power we use when just being sustained.
 
@@ -111,8 +110,7 @@
 	opacity = 0
 	anchored = 0
 	initial_access = list(access_engine)
-	var/const/max_health = 100
-	var/health = max_health
+	max_health = 100
 	var/active = 0
 	var/malfunction = 0 //Malfunction causes parts of the shield to slowly dissapate
 	var/list/deployed_shields = list()
@@ -277,7 +275,7 @@
 	else if(IS_COIL(W) && malfunction && is_open)
 		var/obj/item/stack/cable_coil/coil = W
 		to_chat(user, "<span class='notice'>You begin to replace the wires.</span>")
-		//if(do_after(user, min(60, round( ((maxhealth/health)*10)+(malfunction*10) ))) //Take longer to repair heavier damage
+		//if(do_after(user, min(60, round( ((max_health/health)*10)+(malfunction*10) ))) //Take longer to repair heavier damage
 		if(do_after(user, 30,src))
 			if (coil.use(1))
 				health = max_health

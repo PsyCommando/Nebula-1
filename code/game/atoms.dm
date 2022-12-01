@@ -245,7 +245,12 @@
 /atom/proc/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
 	return
 
-/atom/proc/melt()
+///Called to destroy the atom when its been melted or burnt by high temperatures or the like.
+/atom/proc/melt(var/last_damage_type)
+	return
+
+///Called when an object is exposed to acid damage over time
+/atom/proc/acid_act(var/decl/material/acid, var/exposed_volume)
 	return
 
 /atom/proc/lava_act()

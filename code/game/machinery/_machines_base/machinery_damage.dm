@@ -61,28 +61,33 @@
 		power_change()
 
 /obj/machinery/emp_act(severity)
-	if(use_power && stat == 0)
+	if(use_power && operable())
 		new /obj/effect/temp_visual/emp_burst(loc)
-		use_power_oneoff(7500/severity)
-		take_damage(100/severity, ELECTROCUTE)
-	..()
-
-/obj/machinery/explosion_act(severity)
-	..()
-	if(!QDELETED(src))
-		if((severity == 1 || (severity == 2 && prob(25))))
-			physically_destroyed()
-		else
-			take_damage(100/severity, BRUTE, TRUE)
-
-/obj/machinery/bullet_act(obj/item/projectile/P, def_zone)
+		spark_at(loc, 4, FALSE, src)
+		use_power_oneoff(7500/severity) //#TODO: Maybe use the active power usage value instead of a random power literal
+		take_damage(100/severity, ELECTROCUTE, 0, "power spike")
 	. = ..()
-	take_damage(P.damage, P.damage_type)
 
 /obj/machinery/bash(obj/item/W, mob/user)
-	if(!istype(W) || W.force <= 5 || (W.item_flags & ITEM_FLAG_NO_BLUDGEON))
+	//Add a lower damage threshold for machines
+	if(!istype(W) || W.force <= 5)
 		return FALSE
 	. = ..()
-	if(.)
-		user.setClickCooldown(W.attack_cooldown + W.w_class)
-		take_damage(W.force, W.damtype)
+
+// This is really pretty crap and should be overridden for specific machines.
+/obj/machinery/fluid_act(var/datum/reagents/fluids)
+	..()
+	if(!waterproof && operable() && (fluids.total_volume > FLUID_DEEP))
+		explosion_act(3)
+
+/obj/machinery/attack_generic(var/mob/user, var/damage, var/attack_verb, var/environment_smash)
+	if(environment_smash >= 1)
+		damage = max(damage, 10)
+
+	if(damage >= 10)
+		visible_message(SPAN_DANGER("\The [user] [attack_verb] into \the [src]!"))
+		take_damage(damage)
+	else
+		visible_message(SPAN_NOTICE("\The [user] bonks \the [src] harmlessly."))
+	attack_animation(user)
+
