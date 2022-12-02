@@ -145,14 +145,17 @@
 	qdel(src)
 
 ///Handles shattering the object after it took enough brute damage
-/obj/proc/shatter(var/consumed = FALSE)
+/obj/proc/shatter(var/consumed = FALSE, var/quiet = FALSE, var/skip_qdel = FALSE)
 	var/turf/T = get_turf(src)
-	T?.visible_message(SPAN_DANGER("\The [src] [material ? material.destruction_desc : "shatters"]!"))
-	playsound(src, "shatter", 70, 1)
-	if(!consumed && material && w_class > ITEM_SIZE_SMALL && T)
-		material.place_shards(T)
+	if(!quiet)
+		T?.visible_message(SPAN_DANGER("\The [src] [material ? material.destruction_desc : "shatters"]!"))
+	playsound(src, "shatter", 70, TRUE)
+	if(!consumed && material && (w_class > ITEM_SIZE_TINY) && T)
+		var/amount_shards = LAZYACCESS(matter, material) / SHEET_MATERIAL_AMOUNT
+		material.place_shards(T, amount_shards)
 	dump_contents()
-	qdel(src)
+	if(!skip_qdel)
+		qdel(src)
 
 /obj/proc/explosion_severity_damage(var/severity)
 	var/mult = explosion_severity_damage_multiplier()
