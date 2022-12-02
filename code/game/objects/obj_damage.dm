@@ -181,18 +181,43 @@
 
 /obj/hitby(atom/movable/AM, var/datum/thrownthing/TT)
 	. = ..()
+
 	if(hitsound)
 		var/hit_volume = 75
 		if(isobj(AM))
 			var/obj/O = AM
 			hit_volume = O.get_impact_sound_volume()
+		if(isliving(AM))
+			var/mob/living/L = AM
+			hit_volume = clamp(L.mob_size * 8, 20, 100)
 		playsound(loc, hitsound, hit_volume, TRUE)
 
+	//#TODO: Move the throwing damage stuff into the throw_impact proc, so we don't have to write type specific stuff in here
+	var/tforce = 0
+	var/dtype  = BRUTE
+	var/dflags = 0
+	var/apen = 0
+	if(isobj(AM))
+		var/obj/O = AM
+		tforce = O.throwforce * (TT.speed/THROWFORCE_SPEED_DIVISOR)
+		dtype = O.damtype
+		dflags = O.damage_flags()
+		apen = armor_penetration
+
+	else if(isliving(AM))
+		var/mob/living/L = AM
+		tforce = L.mob_size * (TT.speed/THROWFORCE_SPEED_DIVISOR)
+
+	take_damage(tforce, dtype, dflags, AM, apen, TT.target_zone)
+
+//#TODO: throw_impact would probably make more sense to inflict damage, but more work is needed first, so we don't end up with people throwing eachothers to break into places.
+#if 0
 /obj/throw_impact(atom/movable/hit_atom, datum/thrownthing/TT)
 	. = ..() //throw_impact() calls hitby() on the target
 	if(.)
 		//Apply damge in hitby to avoid having to typecast
 		hit_atom.take_damage(throwforce, damtype, damage_flags(), TT.thrower, armor_penetration)
+#endif
 
 ///Returns the volume at which the hitsound should play assuming the src object is being thrown
 /obj/proc/get_impact_sound_volume()
