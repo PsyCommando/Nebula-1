@@ -232,3 +232,28 @@
 		visible_message(SPAN_NOTICE("\The [user] bonks \the [src] harmlessly.")) //#TODO: This probably should be somehow triggered by the armor absorbing all the damage
 	return TRUE
 
+///Whether the obj can be repaired. Also tells the user the reason it cannot be.
+/obj/proc/can_repair(var/mob/user)
+	if(!is_damaged())
+		if(user)
+			to_chat(user, SPAN_NOTICE("\The [src] does not need repairs."))
+		return FALSE
+	return TRUE
+
+///Returns whether the tool can be used to repair the object. 
+/obj/proc/can_repair_with(var/obj/item/tool, var/mob/user)
+	. = istype(tool, /obj/item/stack/material) && tool.get_material_type() == get_material_type()
+
+///Handles repairing the object with the given tool
+/obj/proc/handle_repair(mob/user, obj/item/tool)
+	var/obj/item/stack/stack = tool
+	var/amount_needed = get_repair_mat_amount()
+	var/used = min(amount_needed, stack.amount)
+	if(used)
+		to_chat(user, SPAN_NOTICE("You fit [used] [stack.singular_name]\s to damaged areas of \the [src]."))
+		stack.use(used)
+		heal(used * DOOR_REPAIR_AMOUNT)
+
+///Returns the amount of needed material sheets in order to fully repair this object
+/obj/proc/get_repair_mat_amount()
+	return CEILING((max_health - health) / DOOR_REPAIR_AMOUNT)

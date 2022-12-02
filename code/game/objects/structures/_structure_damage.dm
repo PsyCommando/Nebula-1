@@ -28,23 +28,3 @@
 /obj/structure/physically_destroyed(var/skip_qdel)
 	if(..(TRUE))
 		return dismantle() //#FIXME: This might not be generic enough?
-///Whether the structure can be repaired. Also tells the user the reason it cannot be.
-/obj/structure/proc/can_repair(var/mob/user)
-	if(health >= max_health)
-		if(user)
-			to_chat(user, SPAN_NOTICE("\The [src] does not need repairs."))
-		return FALSE
-	return TRUE
-
-/obj/structure/proc/can_repair_with(var/obj/item/tool)
-	. = istype(tool, /obj/item/stack/material) && tool.get_material_type() == get_material_type()
-
-/obj/structure/proc/handle_repair(mob/user, obj/item/tool)
-	var/obj/item/stack/stack = tool
-	var/amount_needed = CEILING((max_health - health)/DOOR_REPAIR_AMOUNT)
-	var/used = min(amount_needed, stack.amount)
-	if(used)
-		to_chat(user, SPAN_NOTICE("You fit [used] [stack.singular_name]\s to damaged areas of \the [src]."))
-		stack.use(used)
-		last_damage_message = null
-		heal(used * DOOR_REPAIR_AMOUNT)

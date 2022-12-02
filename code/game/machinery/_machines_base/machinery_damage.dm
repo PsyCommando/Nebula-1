@@ -118,7 +118,14 @@
 		visible_message(SPAN_NOTICE("\The [user] bonks \the [src] harmlessly."))
 	attack_animation(user)
 
-
+/obj/machinery/attackby(obj/item/I, mob/user)
+	//Added an extra is_damaged check, because can_repair_with could be expensive.
+	//Generic machine frame repair code
+	if(can_repair_with(I) && can_repair(user) && handle_repair(user, I))
+		user.setClickCooldown(DEFAULT_ATTACK_COOLDOWN)
+		add_fingerprint(user)
+		return TRUE
+	return ..()
 
 /obj/machinery/physically_destroyed(skip_qdel, quiet)
 	. = ..(TRUE, quiet)
