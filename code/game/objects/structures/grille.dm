@@ -16,6 +16,7 @@
 
 	handle_generic_blending = TRUE
 	material_alteration = MAT_FLAG_ALTERATION_COLOR | MAT_FLAG_ALTERATION_NAME
+	hitsound = 'sound/effects/grillehit.ogg'
 
 	var/destroyed = 0
 	var/list/connections

@@ -21,6 +21,7 @@
 	density = 1
 	anchored = 1
 	icon_state = "tomealtar"
+	hitsound = 'sound/effects/Glasshit.ogg'
 
 	var/mob/living/deity/linked_god
 	var/power_adjustment = 1 //How much power we get/lose
