@@ -83,7 +83,7 @@
 	return list(
 			/obj/item/stack/package_wrap/twenty_five,
 			/obj/item/hand_labeler,
-			/obj/item/stamp/chameleon,
+			/obj/item/stamp/multi/chameleon,
 			/obj/item/pen/chameleon,
 			/obj/item/destTagger,
 		)

@@ -57,7 +57,7 @@
 			updateUsrDialog()
 		return
 
-	else if(IS_PEN(W) || istype(W, /obj/item/stamp))
+	else if(IS_PEN(W) || IS_STAMP(W))
 		close_browser(user, "window=[name]")
 		var/obj/P = LAZYACCESS(pages, cur_page)
 		if(P)
