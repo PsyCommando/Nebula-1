@@ -52,8 +52,8 @@
 		/decl/material/solid/organic/plastic = MATTER_AMOUNT_TRACE
 	)
 
-/obj/item/storage/backpack/holding/singularity_act(S, current_size)
-	var/dist = max((current_size - 2), 1)
+/obj/item/storage/backpack/holding/singularity_act(obj/effect/singularity/S, singularity_stage)
+	var/dist = max((singularity_stage - 2), 1)
 	explosion(src.loc,(dist),(dist*2),(dist*4))
 	return 1000
 

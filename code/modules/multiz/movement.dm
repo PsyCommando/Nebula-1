@@ -245,9 +245,6 @@
 		return TRUE
 	return FALSE
 
-/atom/movable/proc/fall_damage()
-	return 0
-
 /obj/fall_damage()
 	if(w_class == ITEM_SIZE_TINY)
 		return 0

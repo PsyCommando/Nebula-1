@@ -7,5 +7,5 @@
 /obj/effect/decal/is_burnable()
 	return TRUE
 
-/obj/effect/decal/lava_act()
+/obj/effect/decal/lava_act(datum/gas_mixture/air, temperature, pressure)
 	. = !throwing ? ..() : FALSE

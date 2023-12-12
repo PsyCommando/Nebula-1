@@ -672,7 +672,7 @@ var/global/list/supermatter_delam_accent_sounds = list(
 		power *= max(1, 5 - severity)
 		log_and_message_admins("WARN: Explosion near the Supermatter! New EER: [power].")
 
-/obj/machinery/power/supermatter/singularity_act()
+/obj/machinery/power/supermatter/singularity_act(obj/effect/singularity/S, singularity_stage)
 	if(!src.loc)
 		return
 
@@ -710,7 +710,7 @@ var/global/list/supermatter_delam_accent_sounds = list(
 /obj/machinery/power/supermatter/shard/announce_warning() //Shards don't get announcements
 	return
 
-/obj/machinery/power/supermatter/shard/singularity_act()
+/obj/machinery/power/supermatter/shard/singularity_act(obj/effect/singularity/S, singularity_stage)
 	src.forceMove(null)
 	qdel(src)
 	return 5000

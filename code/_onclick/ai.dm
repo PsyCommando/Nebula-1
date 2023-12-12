@@ -85,9 +85,6 @@
 	A.attack_ai(src)
 	return TRUE
 
-/atom/proc/attack_ai(mob/living/silicon/ai/user)
-	return
-
 /*
 	Since the AI handles shift, ctrl, and alt-click differently
 	than anything else in the game, atoms have separate procs

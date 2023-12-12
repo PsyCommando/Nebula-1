@@ -39,7 +39,7 @@
 /obj/effect/projectile/singularity_pull()
 	return
 
-/obj/effect/projectile/singularity_act()
+/obj/effect/projectile/singularity_act(obj/effect/singularity/S, singularity_stage)
 	return 0
 
 /obj/effect/projectile/proc/scale_to(nx,ny,override=TRUE)

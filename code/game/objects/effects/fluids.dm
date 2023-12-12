@@ -26,7 +26,7 @@
 	if(istype(T))
 		T.unwet_floor(FALSE)
 
-/obj/effect/fluid/airlock_crush()
+/obj/effect/fluid/airlock_crush(crush_damage)
 	qdel(src)
 
 /obj/effect/fluid/Move()

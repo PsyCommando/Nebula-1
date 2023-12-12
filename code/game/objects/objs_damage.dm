@@ -23,3 +23,12 @@
 	//Clamp from 0 to 100 so health values larger than max_health don't return unhelpful numbers
 	return clamp(100 - get_percent_health(), 0, 100)
 
+//////////////////////////////////////////////////////////////////////////
+//Impacts
+//////////////////////////////////////////////////////////////////////////
+
+/obj/hitby(atom/movable/AM, datum/thrownthing/TT)
+	..()
+	if(!anchored)
+		step(src, AM.last_move)
+

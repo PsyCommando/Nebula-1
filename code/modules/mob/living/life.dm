@@ -378,7 +378,7 @@
 /mob/living/proc/handle_hud_icons_health()
 	return
 
-/mob/living/singularity_act()
+/mob/living/singularity_act(obj/effect/singularity/S, singularity_stage)
 	if(!simulated)
 		return 0
 	investigate_log("has been consumed by a singularity", "singulo")

@@ -176,6 +176,3 @@
 /mob/living/silicon/robot/RangedAttack(atom/A, var/params)
 	A.attack_robot(src)
 	return TRUE
-
-/atom/proc/attack_robot(mob/user)
-	return attack_ai(user)

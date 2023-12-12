@@ -34,11 +34,6 @@
 	if(!pixel_x && !pixel_y && !pixel_w && !pixel_z)
 		update_directional_offset()
 
-/obj/hitby(atom/movable/AM, var/datum/thrownthing/TT)
-	..()
-	if(!anchored)
-		step(src, AM.last_move)
-
 /obj/proc/create_matter()
 	if(length(matter))
 		for(var/mat in matter)

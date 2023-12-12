@@ -158,14 +158,6 @@
 	return TRUE
 
 /**
-	Handle an EMP affecting this atom
-
-	- `severity`: Strength of the explosion ranging from 1 to 3. Higher is weaker
-*/
-/atom/proc/emp_act(severity)
-	return
-
-/**
 	Set the density of this atom to `new_density`
 
 	- Events: `density_set` (only if density actually changed)
@@ -175,17 +167,6 @@
 	if(density != new_density)
 		density = !!new_density
 		RAISE_EVENT(/decl/observ/density_set, src, !density, density)
-
-/**
-	Handle a projectile `P` hitting this atom
-
-	- `P`: The `/obj/item/projectile` hitting this atom
-	- `def_zone`: The zone `P` is hitting
-	- Return: `0 to 100+`, representing the % damage blocked. Can also be special PROJECTILE values (misc.dm)
-*/
-/atom/proc/bullet_act(obj/item/projectile/P, def_zone)
-	P.on_hit(src, 0, def_zone)
-	return 0
 
 /**
 	Check if this atom is in the path or atom `container`
@@ -354,19 +335,6 @@
 				M.client.perspective = MOB_PERSPECTIVE
 
 /**
-	Handle the destruction of this atom, spilling it's contents by default
-
-	- `skip_qdel`: If calling qdel() on this atom should be skipped.
-	- Return: Unknown, feel free to change this
-*/
-/atom/proc/physically_destroyed(var/skip_qdel)
-	SHOULD_CALL_PARENT(TRUE)
-	dump_contents()
-	if(!skip_qdel && !QDELETED(src))
-		qdel(src)
-	. = TRUE
-
-/**
 	Attempt to detonate the reagents contained in this atom
 
 	- `severity`: Strength of the explosion ranging from 1 to 3. Higher is weaker
@@ -376,71 +344,6 @@
 		for(var/r_type in reagents.reagent_volumes)
 			var/decl/material/R = GET_DECL(r_type)
 			R.explosion_act(src, severity)
-
-/**
-	Handle an explosion of `severity` affecting this atom
-
-	- `severity`: Strength of the explosion ranging from 1 to 3. Higher is weaker
-	- Return: `TRUE` if severity is within range and exploding should continue, otherwise `FALSE`
-*/
-/atom/proc/explosion_act(var/severity)
-	SHOULD_CALL_PARENT(TRUE)
-	. = !currently_exploding && severity > 0 && severity <= 3
-	if(.)
-		currently_exploding = TRUE
-		if(severity < 3)
-			for(var/atom/movable/AM in get_contained_external_atoms())
-				AM.explosion_act(severity + 1)
-			try_detonate_reagents(severity)
-		currently_exploding = FALSE
-
-/**
-	Handle a `user` attempting to emag this atom
-
-	- `remaining_charges`: Used for nothing TODO: Fix this
-	- `user`: The user attempting to emag this atom
-	- `emag_source`: The source of the emag
-	- Returns: 1 if successful, -1 if not, NO_EMAG_ACT if it cannot be emaged
-*/
-/atom/proc/emag_act(var/remaining_charges, var/mob/user, var/emag_source)
-	return NO_EMAG_ACT
-
-/**
-	Handle this atom being exposed to fire
-
-	- `air`: The gas_mixture for this loc
-	- `exposed_temperature`: The temperature of the air
-	- `exposed_volume`: The volume of the air
-*/
-/atom/proc/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
-	return
-
-/// Handle this atom being destroyed through melting
-/atom/proc/melt()
-	return
-
-/**
-	Handle this atom being exposed to lava. Calls qdel() by default
-
-	- Returns: `TRUE` if qdel() was called, otherwise `FALSE`
-*/
-/atom/proc/lava_act()
-	visible_message(SPAN_DANGER("\The [src] sizzles and melts away, consumed by the lava!"))
-	playsound(src, 'sound/effects/flare.ogg', 100, 3)
-	qdel(src)
-	. = TRUE
-
-/**
-	Handle this atom being hit by a thrown atom
-
-	- `AM`: The atom hitting this atom
-	- `TT`: A datum wrapper for a thrown atom, containing important info
-*/
-/atom/proc/hitby(atom/movable/AM, var/datum/thrownthing/TT)
-	SHOULD_CALL_PARENT(TRUE)
-	if(isliving(AM))
-		var/mob/living/M = AM
-		M.apply_damage(TT.speed*5, BRUTE)
 
 /**
 	Attempt to add blood to this atom
@@ -599,17 +502,6 @@
 
 /atom/movable/onDropInto(var/atom/movable/AM)
 	return loc
-
-/**
-	Handle this atom being hit by a grab.
-
-	Called by resolve_attackby()
-
-	- `G`: The grab hitting this atom
-	- Return: `TRUE` to skip attackby() and afterattack() or `FALSE`
-*/
-/atom/proc/grab_attack(var/obj/item/grab/G)
-	return FALSE
 
 /atom/proc/climb_on()
 
@@ -852,9 +744,6 @@
 
 /atom/proc/can_climb_from_below(var/mob/climber)
 	return FALSE
-
-/atom/proc/singularity_act()
-	return 0
 
 /atom/proc/singularity_pull(S, current_size)
 	return

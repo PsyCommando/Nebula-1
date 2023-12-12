@@ -526,7 +526,7 @@
 		return FALSE
 	return C.turf_place(src, user)
 
-/turf/singularity_act(S, current_size)
+/turf/singularity_act(obj/effect/singularity/S, singularity_stage)
 	if(!simulated || is_open())
 		return 0
 	var/base_turf_type = get_base_turf_by_area(src)

@@ -39,8 +39,3 @@
 
 /atom/movable/proc/do_simple_ranged_interaction(var/mob/user)
 	return FALSE
-
-/atom/movable/hitby(var/atom/movable/AM)
-	..()
-	if(density && prob(50))
-		do_simple_ranged_interaction()

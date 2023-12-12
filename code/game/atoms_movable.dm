@@ -80,17 +80,6 @@
 
 	return 0
 
-/atom/movable/attack_hand(mob/user)
-	// Unbuckle anything buckled to us.
-	if(!can_buckle || !buckled_mob || !user.check_dexterity(DEXTERITY_SIMPLE_MACHINES, TRUE))
-		return ..()
-	user_unbuckle_mob(user)
-	return TRUE
-
-/atom/movable/hitby(var/atom/movable/AM, var/datum/thrownthing/TT)
-	..()
-	process_momentum(AM,TT)
-
 /atom/movable/proc/process_momentum(var/atom/movable/AM, var/datum/thrownthing/TT)//physic isn't an exact science
 	. = momentum_power(AM,TT)
 
@@ -254,12 +243,6 @@
 				L = thing
 				L.source_atom.update_light()
 
-//called when src is thrown into hit_atom
-/atom/movable/proc/throw_impact(atom/hit_atom, var/datum/thrownthing/TT)
-	SHOULD_CALL_PARENT(TRUE)
-	if(istype(hit_atom) && !QDELETED(hit_atom))
-		hit_atom.hitby(src, TT)
-
 /atom/movable/proc/throw_at(atom/target, range, speed, mob/thrower, spin = TRUE, datum/callback/callback) //If this returns FALSE then callback will not be called.
 	. = TRUE
 	if (!target || speed <= 0 || QDELETED(src) || (target.z != src.z))
@@ -318,8 +301,6 @@
 		if(T)
 			forceMove(T)
 
-/atom/movable/proc/get_bullet_impact_effect_type()
-	return BULLET_IMPACT_NONE
 
 /atom/movable/proc/pushed(var/pushdir)
 	set waitfor = FALSE
@@ -442,14 +423,6 @@
 
 /atom/movable/proc/handle_buckled_relaymove(var/datum/movement_handler/mh, var/mob/mob, var/direction, var/mover)
 	return
-
-/atom/movable/singularity_act()
-	if(!simulated)
-		return 0
-	physically_destroyed()
-	if(!QDELETED(src))
-		qdel(src)
-	return 2
 
 /atom/movable/singularity_pull(S, current_size)
 	if(simulated && !anchored)
