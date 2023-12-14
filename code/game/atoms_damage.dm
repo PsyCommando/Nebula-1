@@ -27,6 +27,24 @@
 	return 0
 
 //////////////////////////////////////////////////////////////////////////
+//Damage Interface
+//////////////////////////////////////////////////////////////////////////
+
+/**
+	Handles incoming damage dealt to this atom.
+	- `amount`: Positive amount of damage dealt to this atom.
+	- `damage_type`: The type of damage inflicted to this atom.
+	- `damage_flags`: The damage flags of the damage inflicted to this atom.
+	- `inflicter` : The atom that inflicted the damage. Or a string describing the source of the damage.
+	- `armor_pen`: The armor penetration value of the damage dealt to this atom.
+	- `def_zone`: *PLACEHOLDER DON'T REMOVE* The defensive zone targeted by the damage being dealt to this atom.
+	- `quiet`: If TRUE this proc, and the procs it call will not print text to chat, or cause any effects/sounds.
+	- Returns: The actual amount of damage dealt to this atom after modifiers and armor.
+*/
+/atom/proc/take_damage(amount, damage_type = BRUTE, damage_flags = 0, inflicter = null, armor_pen = 0, def_zone = null, quiet = FALSE)
+	return 0
+
+//////////////////////////////////////////////////////////////////////////
 //Destruction
 //////////////////////////////////////////////////////////////////////////
 

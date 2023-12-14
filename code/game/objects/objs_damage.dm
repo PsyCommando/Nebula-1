@@ -64,8 +64,25 @@
 		return SPAN_DANGER("It looks heavily damaged.")
 
 //////////////////////////////////////////////////////////////////////////
-//
+// Damage Interface
 //////////////////////////////////////////////////////////////////////////
+
+/obj/apply_health_change(difference = 0, damage_type, damage_flags, def_zone, quiet = FALSE)
+	//!- We allow health changes without a damage type, so make sure we also check can_take_damage() first.
+	if(!can_take_damage() || (damage_type && !is_vulnerable_to_damage_type(damage_type, damage_flags, def_zone)))
+		return TRUE
+
+	//Apply health change if there's any to apply.
+	if(difference != 0)
+		set_health(health + difference)
+
+	//Abort if we're not dead
+	if(health > 0)
+		return TRUE
+
+	//We're dead
+	pick_destruction_proc(difference, damage_type, damage_flags, quiet)
+	return FALSE
 
 //////////////////////////////////////////////////////////////////////////
 //Destruction
