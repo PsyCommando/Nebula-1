@@ -86,10 +86,6 @@
 		if(!ai_in_use && !is_in_use)
 			in_use = 0
 
-/obj/attack_ghost(mob/user)
-	ui_interact(user)
-	..()
-
 /obj/proc/interact(mob/user)
 	return
 
@@ -116,23 +112,6 @@
 /obj/proc/show_message(msg, type, alt, alt_type)//Message, type of message (1 or 2), alternative message, alt message type (1 or 2)
 	return
 
-/obj/proc/damage_flags()
-	. = 0
-	if(has_edge(src))
-		. |= DAM_EDGE
-	if(is_sharp(src))
-		. |= DAM_SHARP
-		if(damtype == BURN)
-			. |= DAM_LASER
-
-/obj/attackby(obj/item/O, mob/user)
-	if(obj_flags & OBJ_FLAG_ANCHORABLE)
-		if(IS_WRENCH(O))
-			wrench_floor_bolts(user)
-			update_icon()
-			return
-	return ..()
-
 /obj/proc/wrench_floor_bolts(mob/user, delay=20)
 	playsound(loc, 'sound/items/Ratchet.ogg', 100, 1)
 	if(anchored)
@@ -145,16 +124,8 @@
 		anchored = !anchored
 	return 1
 
-/obj/attack_hand(mob/user)
-	if(Adjacent(user))
-		add_fingerprint(user)
-	return ..()
-
 /obj/is_fluid_pushable(var/amt)
 	return ..() && w_class <= round(amt/20)
-
-/obj/proc/can_embed()
-	return is_sharp(src)
 
 /obj/examine(mob/user, distance, infix, suffix)
 	. = ..()
@@ -174,10 +145,6 @@
 
 	set_dir(turn(dir, 90))
 	update_icon()
-
-//For things to apply special effects after damaging an organ, called by organ's take_damage
-/obj/proc/after_wounding(obj/item/organ/external/organ, datum/wound)
-	return
 
 /obj/get_mass()
 	return min(2**(w_class-1), 100)
@@ -289,25 +256,6 @@
 	for(var/obj/contained_obj in get_contained_external_atoms()) // machines handle component parts separately
 		. = MERGE_ASSOCS_WITH_NUM_VALUES(., contained_obj.get_contained_matter())
 
-////////////////////////////////////////////////////////////////
-// Interactions
-////////////////////////////////////////////////////////////////
-/**Returns a text string to describe the current damage level of the item, or null if non-applicable. */
-/obj/proc/get_examined_damage_string()
-	if(!can_take_damage())
-		return
-	var/health_percent = get_percent_health()
-	if(health_percent >= 100)
-		return SPAN_NOTICE("It looks fully intact.")
-	else if(health_percent > 75)
-		return SPAN_NOTICE("It has a few cracks.")
-	else if(health_percent > 50)
-		return SPAN_WARNING("It looks slightly damaged.")
-	else if(health_percent > 25)
-		return SPAN_WARNING("It looks moderately damaged.")
-	else
-		return SPAN_DANGER("It looks heavily damaged.")
-
 /obj/fluid_act(var/datum/reagents/fluids)
 	..()
 	if(!QDELETED(src) && fluids?.total_volume)
@@ -319,16 +267,6 @@
 		return FALSE
 	var/decl/material/mat = get_material()
 	return !mat || mat.dissolves_in <= solvent_power
-
-/obj/melt()
-	if(length(matter))
-		var/datum/gas_mixture/environment = loc?.return_air()
-		for(var/mat in matter)
-			var/decl/material/M = GET_DECL(mat)
-			M.add_burn_product(environment, MOLES_PER_MATERIAL_UNIT(matter[mat]))
-		matter = null
-	new /obj/effect/decal/cleanable/molten_item(src)
-	qdel(src)
 
 /obj/can_be_injected_by(var/atom/injector)
 	return ATOM_IS_OPEN_CONTAINER(src)

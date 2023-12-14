@@ -1,0 +1,39 @@
+//////////////////////////////////////////////////////////////////////////
+// Unarmed
+//////////////////////////////////////////////////////////////////////////
+
+/obj/attack_hand(mob/user)
+	if(Adjacent(user))
+		add_fingerprint(user)
+	return ..()
+
+/obj/attack_ghost(mob/user)
+	ui_interact(user)
+	return ..()
+
+//////////////////////////////////////////////////////////////////////////
+// Weapon/items
+//////////////////////////////////////////////////////////////////////////
+
+/obj/attackby(obj/item/O, mob/user)
+	if(obj_flags & OBJ_FLAG_ANCHORABLE)
+		if(IS_WRENCH(O))
+			wrench_floor_bolts(user)
+			update_icon()
+			return
+	return ..()
+
+//////////////////////////////////////////////////////////////////////////
+//Impacts
+//////////////////////////////////////////////////////////////////////////
+
+/obj/hitby(atom/movable/AM, datum/thrownthing/TT)
+	..()
+	if(!anchored)
+		step(src, AM.last_move)
+
+/**
+ For things to apply special effects after damaging an organ, called by organ's take_damage
+ */
+/obj/proc/after_wounding(obj/item/organ/external/organ, datum/wound)
+	return
