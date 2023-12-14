@@ -1147,21 +1147,9 @@
 /mob/get_mass()
 	return mob_size
 
-/mob/physically_destroyed(var/skip_qdel)
-	SHOULD_CALL_PARENT(FALSE)
-	gib()
-
 /mob/get_contained_external_atoms()
 	. = ..()
 	LAZYREMOVE(., get_organs())
-
-/mob/explosion_act(var/severity)
-	. = ..()
-	if(!QDELETED(src))
-		if(severity == 1)
-			physically_destroyed()
-		else if(!is_blind())
-			flash_eyes()
 
 /mob/proc/get_telecomms_race_info()
 	return list("Unknown", FALSE)
@@ -1412,9 +1400,6 @@
 
 /mob/can_be_injected_by(var/atom/injector)
 	return FALSE // Handled elsewhere in syringe logic.
-
-/mob/proc/getBrainLoss()
-	return 0
 
 /mob/proc/get_bodytype_category()
 	return get_bodytype()?.bodytype_category
