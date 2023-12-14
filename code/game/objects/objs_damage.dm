@@ -88,6 +88,16 @@
 //Destruction
 //////////////////////////////////////////////////////////////////////////
 
+/**
+	Called when the atom's health reaches 0, and it's destroyed. Choses a destruction effect to run.
+ */
+/obj/proc/pick_destruction_proc(damage, damage_type, damage_flags, no_debris = FALSE, quiet = FALSE)
+	switch(damage_type)
+		if(BURN)
+			melt(FALSE, no_debris, quiet)
+		else
+			physically_destroyed(FALSE, no_debris, quiet)
+
 /obj/melt(skip_qdel, no_debris, quiet)
 	if(!no_debris)
 		if(length(matter))
