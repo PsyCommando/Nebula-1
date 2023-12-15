@@ -15,6 +15,16 @@
 	return FALSE
 
 /**
+	Check if this atom may take damage from the specified damage type.
+	- `damage_type`: The damage type to check vulnerability to.
+	- `damage_flags`: The damage flags for the specified damage type.
+	- `def_zone`: If applicable, the zone targeted by the damage.
+	- Returns: TRUE if this atom is vulnerable to the given damage type and flags and zone.
+ */
+/atom/proc/is_vulnerable_to_damage_type(damage_type, damage_flags, def_zone)
+	return can_take_damage()
+
+/**
 	Returns the percentage of "health" remaining for this atom.
  */
 /atom/proc/get_percent_health()

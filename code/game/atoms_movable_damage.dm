@@ -1,3 +1,7 @@
+//////////////////////////////////////////////////////////////////////////
+// Accessors
+//////////////////////////////////////////////////////////////////////////
+
 /**
 	Fall damage to apply for a height of a single z level.
  */
@@ -5,7 +9,7 @@
 	return 0
 
 //////////////////////////////////////////////////////////////////////////
-//Unarmed Attacks
+// Unarmed Attacks
 //////////////////////////////////////////////////////////////////////////
 
 /atom/movable/attack_hand(mob/user)
@@ -16,7 +20,7 @@
 	return TRUE
 
 //////////////////////////////////////////////////////////////////////////
-//Item Attacks
+// Item Attacks
 //////////////////////////////////////////////////////////////////////////
 
 /atom/movable/attackby(obj/item/W, mob/user, click_params)
@@ -24,7 +28,7 @@
 	return bash(W,user) //#TODO: Will be changed in favor of using the mob callchain for melee weapons.
 
 //////////////////////////////////////////////////////////////////////////
-//Melee Attacks
+// Melee Attacks
 //////////////////////////////////////////////////////////////////////////
 
 /**
@@ -37,6 +41,7 @@
 	FALSE also triggers a call to the weapon's afterattack proc.
  */
 /atom/movable/proc/bash(obj/item/W, mob/user)
+	//#TODO: Remove this in favor of the mob callchain for melee damages
 	if(isliving(user) && user.a_intent == I_HELP)
 		return FALSE
 	if(W.item_flags & ITEM_FLAG_NO_BLUDGEON)
@@ -45,7 +50,7 @@
 	return TRUE
 
 //////////////////////////////////////////////////////////////////////////
-//Impacts
+// Impacts
 //////////////////////////////////////////////////////////////////////////
 
 /atom/movable/hitby(atom/movable/AM, datum/thrownthing/TT)
@@ -72,7 +77,7 @@
 	return BULLET_IMPACT_NONE
 
 //////////////////////////////////////////////////////////////////////////
-//Misc Acts
+// Misc Acts
 //////////////////////////////////////////////////////////////////////////
 
 /atom/movable/singularity_act(obj/effect/singularity/S, singularity_stage)
@@ -132,7 +137,7 @@
 	//Deal the actual damage we suffered
 	if(amount <= 0)
 		return 0 //must return a number
-	apply_health_change(-1 * amount, damage_type, damage_flags, def_zone, quiet)
+	apply_health_change(-1 * amount, damage_type, damage_flags, inflicter, def_zone, quiet)
 	return amount
 
 /**
@@ -151,7 +156,7 @@
 	//Sanity crash!
 	if(amount < 0)
 		CRASH("'[type]'/heal proc was called with negative healing.") //Negative amounts are an implementation issue.
-	return apply_health_change(amount, damage_type, damage_flags, def_zone, quiet)
+	return apply_health_change(amount, damage_type, damage_flags, inflicter, def_zone, quiet)
 
 /**
 	Applies incoming damage modifiers to the parameters it receives, and returns a list with the modified values.
@@ -168,10 +173,12 @@
 	if(amount <= 0)
 		return //Don't create a new list for nothing
 
-	//Apply armor
-	var/datum/extension/armor/A = get_extension(src, /datum/extension/armor)
-	if(A)
-		var/list/dam_after_armor = A.apply_damage_modifications(amount, damage_type, damage_flags, null, armor_pen, quiet)
+	//Apply armors
+	var/list/armors = get_armors_by_zone(def_zone, damage_type, damage_flags)
+	for(var/datum/extension/armor/A in armors)
+		if(!istype(A))
+			continue
+		var/list/dam_after_armor = A.apply_damage_modifications(amount, damage_type, damage_flags, isliving(src)? src : null, armor_pen, quiet)
 		if(dam_after_armor[1] != amount)
 			LAZYSET(., "amount", dam_after_armor[1])
 		if(dam_after_armor[2] != damage_type)
@@ -182,6 +189,18 @@
 			LAZYSET(., "armor_pen", dam_after_armor[5])
 
 /**
+	Obtain a list of armors to apply to damage inflicted to a particular zone. By default applies only the main armor datum.
+	- `def_zone`: If applicable, the locational damage location where the damage is being applied.
+	- `damage_type`: Damage type of the damage being dealt.
+	- `damage_flags`: Damage flags for the damage type of the damage being dealt.
+	- Returns: A list of armors to apply to the damage for the given def_zone. Or null.
+ */
+/atom/movable/proc/get_armors_by_zone(def_zone, damage_type, damage_flags)
+	var/base_armor = get_extension(src, /datum/extension/armor)
+	if(base_armor)
+		LAZYADD(., base_armor)
+
+/**
 	Abstract handling for health changes, and health checking.
 	Essentially, unlike set_health, keeps track of the damage type, def zone, and the damage/gain applied.
 	So things that keep track of damage amounts can do what they want here. (AKA mobs)
@@ -189,9 +208,10 @@
 	- `difference`: The signed value to add to the current "health"/damage counter.
 	- `damage_type`: Damage type of the damage being dealt.
 	- `damage_flags`: Damage flags for the damage type of the damage being dealt.
+	- `inflicter`: A descriptive string, or a reference to the atom that inflicted the health change.
 	- `def_zone`: If applicable, the locational damage location where the damage is being applied.
 	- `quiet`: If TRUE this proc, and the procs it call will not print text to chat, or cause any effects/sounds.
 	- Returns: The actual amount our "health" was changed by.
  */
-/atom/movable/proc/apply_health_change(difference = 0, damage_type = BRUTE, damage_flags = 0, def_zone = null, quiet = FALSE)
-	return FALSE
+/atom/movable/proc/apply_health_change(difference = 0, damage_type = BRUTE, damage_flags = 0, inflicter = null, def_zone = null, quiet = FALSE)
+	return 0
