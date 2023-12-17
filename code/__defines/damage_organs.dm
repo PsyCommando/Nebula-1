@@ -1,53 +1,21 @@
-#define BRUTE       "brute"
-#define BURN        "fire"
-#define TOX         "tox"
-#define OXY         "oxy"
-#define CLONE       "clone"
-#define PAIN        "pain"
-#define ELECTROCUTE "electrocute"
-
+//Wound types
 #define CUT       "cut"
 #define BRUISE    "bruise"
 #define PIERCE    "pierce"
 #define LASER     "laser"
 #define SHATTER   "shatter"
 
+//Mob Status Effects
 #define STUN      "stun"
 #define WEAKEN    "weaken"
 #define PARALYZE  "paralize"
-#define IRRADIATE "irradiate"
 #define SLUR      "slur"
 #define STUTTER   "stutter"
 #define EYE_BLUR  "eye_blur"
 #define DROWSY    "drowsy"
 
-// Damage flags
-///Damage has the sharp property and may cause cuts and bleeding.
-#define DAM_SHARP     BITFLAG(0)
-///Damage may cause dismemberment.
-#define DAM_EDGE      BITFLAG(1)
-///Damage causes localized burns.
-#define DAM_LASER     BITFLAG(2)
-///Damage is caused by high velocity projectiles.
-#define DAM_BULLET    BITFLAG(3)
-///Damage was dealt from an explosion.
-#define DAM_EXPLODE   BITFLAG(4)
-/// Makes apply_damage calls without specified zone distribute damage rather than randomly choose organ (for humans)
-#define DAM_DISPERSED BITFLAG(5)
-/// Toxin damage that should be mitigated by biological (i.e. sterile) armor
-#define DAM_BIO       BITFLAG(6)
-
 #define FIRE_DAMAGE_MODIFIER 0.0215 // Higher values result in more external fire damage to the skin. (default 0.0215)
 #define  AIR_DAMAGE_MODIFIER 2.025  // More means less damage from hot air scalding lungs, less = more damage. (default 2.025)
-
-//Armor Resistance Types
-#define ARMOR_MELEE  "melee"   //Blunt and cutting weapons
-#define ARMOR_BULLET "bullet"  //Kinectic projectiles
-#define ARMOR_BOMB   "bomb"    //Explosions
-#define ARMOR_LASER  "laser"   //Laser weapons
-#define ARMOR_ENERGY "energy"  //Intense heat, electricity
-#define ARMOR_RAD    "rad"     //Ionizing radiation
-#define ARMOR_BIO    "bio"     //Biohazards toxin damage
 
 // Organ defines.
 #define ORGAN_CUT_AWAY   BITFLAG(0)  // The organ is in the process of being surgically removed.

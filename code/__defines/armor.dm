@@ -48,3 +48,22 @@
 
 /**Armor piercing value that will bypass any armors completely */
 #define  ARMOR_PIERCING_BYPASSED	INFINITY
+
+//////////////////////////////////////////////////////////////////////////
+// Armor Resistance Types
+//////////////////////////////////////////////////////////////////////////
+
+///Blunt and cutting weapons
+#define ARMOR_MELEE  "melee"
+///Kinectic projectiles
+#define ARMOR_BULLET "bullet"
+///Explosions
+#define ARMOR_BOMB   "bomb"
+///Laser weapons
+#define ARMOR_LASER  "laser"
+///Intense heat, electricity
+#define ARMOR_ENERGY "energy"
+///Ionizing radiation
+#define ARMOR_RAD    "rad"
+///Biohazards toxin damage
+#define ARMOR_BIO    "bio"
