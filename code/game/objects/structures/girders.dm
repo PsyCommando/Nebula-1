@@ -191,7 +191,7 @@
 /obj/structure/girder/explosion_act(severity)
 	..()
 	if(severity == 1 || (severity == 2 && prob(30)) || (severity == 3 && prob(5)))
-		physically_destroyed()
+		physically_destroyed(,, TRUE)
 
 /obj/structure/girder/cult
 	icon= 'icons/obj/cult.dmi'

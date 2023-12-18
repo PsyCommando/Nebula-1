@@ -133,7 +133,7 @@
 /obj/structure/ore_box/explosion_act(severity)
 	. = ..()
 	if(. && !QDELETED(src) && (severity == 1 || prob(50)))
-		physically_destroyed()
+		physically_destroyed(,, TRUE)
 
 /obj/structure/ore_box/get_alt_interactions(mob/user)
 	. = ..()

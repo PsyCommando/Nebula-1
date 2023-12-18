@@ -118,8 +118,9 @@
 		visible_message(SPAN_WARNING("\The [src] is showing some damage!"))
 		last_damage_message = 0.75
 
-/obj/structure/physically_destroyed(var/skip_qdel)
-	if(..(TRUE))
+/obj/structure/physically_destroyed(skip_qdel, no_debris, quiet)
+	//#TODO: This is a really bad way to handle destruction
+	if(..(TRUE, no_debris, quiet))
 		return dismantle()
 
 /obj/structure/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
@@ -210,7 +211,7 @@
 	..()
 	if(!QDELETED(src))
 		if(severity == 1)
-			physically_destroyed()
+			physically_destroyed(,, TRUE)
 		else if(severity == 2)
 			take_damage(rand(20, 30))
 		else

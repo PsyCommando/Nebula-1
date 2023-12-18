@@ -114,11 +114,10 @@
 
 	return ..()
 
-/obj/machinery/turret/physically_destroyed(skip_qdel)
-	if(installed_gun && prob(gun_looting_prob))
+/obj/machinery/turret/physically_destroyed(skip_qdel, no_debris, quiet)
+	if(!no_debris && installed_gun && prob(gun_looting_prob))
 		installed_gun.dropInto(loc)
 		installed_gun = null
-
 	return ..()
 
 // Handles charging the powercell of an installed energy weapon.

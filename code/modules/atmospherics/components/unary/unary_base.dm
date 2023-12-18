@@ -31,10 +31,10 @@
 /obj/machinery/atmospherics/unary/get_mass()
 	return ..() + air_contents.get_mass()
 
-/obj/machinery/atmospherics/unary/physically_destroyed()
+/obj/machinery/atmospherics/unary/physically_destroyed(skip_qdel, no_debris, quiet)
 	if(loc && air_contents)
 		loc.assume_air(air_contents)
-	. = ..()	
+	. = ..()
 
 /obj/machinery/atmospherics/unary/dismantle()
 	if(loc && air_contents)

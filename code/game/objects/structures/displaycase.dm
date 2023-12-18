@@ -68,16 +68,21 @@
 	SHOULD_CALL_PARENT(FALSE)
 	. = TRUE
 
-/obj/structure/displaycase/physically_destroyed(var/skip_qdel)
+/obj/structure/displaycase/physically_destroyed(skip_qdel, no_debris, quiet)
 	if(destroyed)
 		return
 	. = ..(TRUE)
 	if(.)
 		set_density(0)
 		destroyed = TRUE
-		subtract_matter(new /obj/item/shard(get_turf(src), material?.type))
-		playsound(src, "shatter", 70, 1)
 		update_icon()
+		if(!quiet)
+			playsound(src, "shatter", 70, TRUE)
+		//#FIXME: We could easily just use a constant glass amount for this?
+		if(!no_debris)
+			subtract_matter(new /obj/item/shard(get_turf(src), material?.type))
+		else
+			subtract_matter(atom_info_repository.get_instance_of(/obj/item/shard, material?.type))
 
 /obj/structure/displaycase/on_update_icon()
 	..()

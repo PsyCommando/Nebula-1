@@ -75,22 +75,29 @@ var/global/list/fishtank_cache = list()
 	else
 		. = ..()
 
-/obj/structure/glass_tank/physically_destroyed(var/silent)
+/obj/structure/glass_tank/physically_destroyed(skip_qdel, no_debris, quiet)
 	SHOULD_CALL_PARENT(FALSE)
 	deleting = TRUE
 	var/turf/T = get_turf(src)
-	playsound(T, "shatter", 70, 1)
-	new /obj/item/shard(T)
-	if(!silent)
+
+	if(!quiet)
+		playsound(T, "shatter", 70, TRUE)
 		if(contents.len || reagents.total_volume)
 			visible_message(SPAN_DANGER("\The [src] shatters, spilling its contents everywhere!"))
 		else
 			visible_message(SPAN_DANGER("\The [src] shatters!"))
-	dump_contents()
+
+	if(!no_debris)
+		new /obj/item/shard(T)
+		dump_contents()
+
+	//#FIXME: This could be using cached neighbors?
 	for(var/obj/structure/glass_tank/A in orange(1, src))
 		if(!A.deleting && A.type == type)
-			A.physically_destroyed(TRUE)
-	qdel(src)
+			A.physically_destroyed(,, TRUE)
+
+	if(!skip_qdel && !QDELETED(src))
+		qdel(src)
 
 /obj/structure/glass_tank/dump_contents()
 	. = ..()

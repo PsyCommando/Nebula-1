@@ -25,8 +25,8 @@
 		attached_shoes.remove_cuffs()
 	. = ..()
 
-/obj/item/handcuffs/physically_destroyed(skip_qdel)
-	if(istype(loc, /obj/item/clothing/shoes))
+/obj/item/handcuffs/physically_destroyed(skip_qdel, no_debris, quiet)
+	if(!quiet && istype(loc, /obj/item/clothing/shoes))
 		loc.visible_message(SPAN_WARNING("\The [src] attached to \the [loc] snap and fall away!"), range = 1)
 	. = ..()
 

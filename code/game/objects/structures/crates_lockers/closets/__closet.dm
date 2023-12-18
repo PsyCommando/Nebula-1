@@ -219,7 +219,7 @@ var/global/list/closets = list()
 /obj/structure/closet/explosion_act(severity)
 	..()
 	if(!QDELETED(src) && (severity == 1 || (severity == 2 && prob(50)) || (severity == 3 && prob(5))))
-		physically_destroyed()
+		physically_destroyed(,, TRUE)
 
 /obj/structure/closet/bullet_act(var/obj/item/projectile/Proj)
 	if(Proj.penetrating)

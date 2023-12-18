@@ -18,9 +18,10 @@
 	update_icon()
 	events_repository.register(/decl/observ/dir_set, src, src, .proc/update_layers)
 
-/obj/structure/defensive_barrier/physically_destroyed(var/skip_qdel)
-	visible_message(SPAN_DANGER("\The [src] was destroyed!"))
-	playsound(src, 'sound/effects/clang.ogg', 100, 1)
+/obj/structure/defensive_barrier/physically_destroyed(skip_qdel, no_debris, quiet)
+	if(!quiet)
+		visible_message(SPAN_DANGER("\The [src] was destroyed!"))
+		playsound(src, 'sound/effects/clang.ogg', 100, TRUE)
 	. = ..()
 
 /obj/structure/defensive_barrier/Destroy()

@@ -109,8 +109,8 @@
 				to_chat(user, "You repair some dents on \the [src].")
 
 
-/obj/item/airlock_brace/physically_destroyed(skip_qdel)
-	if(airlock)
+/obj/item/airlock_brace/physically_destroyed(skip_qdel, no_debris, quiet)
+	if(airlock && !quiet)
 		airlock.visible_message(SPAN_DANGER("\The [src] breaks off of \the [airlock]!"))
 	unlock_brace(null)
 	. = ..()

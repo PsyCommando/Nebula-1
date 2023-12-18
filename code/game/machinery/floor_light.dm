@@ -136,7 +136,7 @@ var/global/list/floor_light_cache = list()
 	. = ..()
 	if(. && !QDELETED(src))
 		if(severity == 1 || (severity == 2 && prob(50)) || (severity == 3 && prob(5)))
-			physically_destroyed()
+			physically_destroyed(,, TRUE)
 		else
 			if(severity == 2 && prob(20))
 				set_broken(TRUE)

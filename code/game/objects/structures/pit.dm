@@ -173,7 +173,7 @@
 /obj/structure/gravemarker/attackby(obj/item/W, mob/user)
 	if(IS_HATCHET(W))
 		if(W.do_tool_interaction(TOOL_HATCHET, user, src, 3 SECONDS, "hacking away at", "hacking at"))
-			physically_destroyed(FALSE)
+			physically_destroyed()
 		return TRUE
 	if(IS_PEN(W))
 		var/msg = sanitize(input(user, "What should it say?", "Grave marker", message) as text|null)

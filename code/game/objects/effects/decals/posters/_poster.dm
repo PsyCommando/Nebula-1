@@ -38,8 +38,9 @@
 	set_design(given_poster_type || poster_design || pick(decls_repository.get_decl_paths_of_subtype(/decl/poster_design)))
 	set_dir(placement_dir || dir)
 
-/obj/structure/sign/poster/physically_destroyed(skip_qdel)
-	playsound(src, sound_destroyed, 80, TRUE)
+/obj/structure/sign/poster/physically_destroyed(skip_qdel, no_debris, quiet)
+	if(!quiet)
+		playsound(src, sound_destroyed, 80, TRUE)
 	//Only fully destroy if we're ruined first
 	if(ruined)
 		return ..()

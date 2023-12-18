@@ -235,16 +235,17 @@ var/global/list/turret_icons
 
 		return 1
 
-/obj/machinery/porta_turret/physically_destroyed(skip_qdel)
+/obj/machinery/porta_turret/physically_destroyed(skip_qdel, no_debris, quiet)
 	if(installation)
 		var/obj/item/gun/energy/Gun = new installation(loc)
 		var/obj/item/cell/power_supply = Gun.get_cell()
 		power_supply?.charge = gun_charge
 		Gun.update_icon()
-	if(prob(50))
-		SSmaterials.create_object(/decl/material/solid/metal/steel, loc, rand(1,4))
-	if(prob(50))
-		new /obj/item/assembly/prox_sensor(loc)
+	if(!no_debris)
+		if(prob(50))
+			SSmaterials.create_object(/decl/material/solid/metal/steel, loc, rand(1,4))
+		if(prob(50))
+			new /obj/item/assembly/prox_sensor(loc)
 	. = ..()
 
 /obj/machinery/porta_turret/attackby(obj/item/I, mob/user)
@@ -381,7 +382,7 @@ var/global/list/turret_icons
 	. = ..()
 	if(. && !QDELETED(src))
 		if(severity == 1 || (severity == 2 && prob(25)))
-			physically_destroyed()
+			physically_destroyed(,, TRUE)
 		else if(severity == 2)
 			take_damage(initial(health) * 8)
 		else

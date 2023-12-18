@@ -146,7 +146,7 @@
 		W.add_fingerprint(user)
 		qdel(src)
 
-/obj/item/wheelchair_kit/physically_destroyed(skip_qdel)
+/obj/item/wheelchair_kit/physically_destroyed(skip_qdel, no_debris, quiet)
 	//Make sure if the kit is destroyed to drop the same stuff as the actual wheelchair
 	var/obj/structure/S = new structure_form_type(get_turf(src))
 	S.physically_destroyed()

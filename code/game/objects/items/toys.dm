@@ -79,11 +79,13 @@
 		visible_message(SPAN_WARNING("\The [src] bursts!"))
 		physically_destroyed()
 
-/obj/item/chems/water_balloon/physically_destroyed(skip_qdel)
+/obj/item/chems/water_balloon/physically_destroyed(skip_qdel, no_debris, quiet)
 	if(reagents?.total_volume > 0)
-		new /obj/effect/temporary(src, 5, icon, "[get_world_inventory_state()]_burst")
-		reagents.splash_turf(get_turf(src), reagents.total_volume)
-		playsound(src, 'sound/effects/balloon-pop.ogg', 75, TRUE, 3)
+		if(!no_debris)
+			new /obj/effect/temporary(src, 5, icon, "[get_world_inventory_state()]_burst")
+			reagents.splash_turf(get_turf(src), reagents.total_volume)
+		if(!quiet)
+			playsound(src, 'sound/effects/balloon-pop.ogg', 75, TRUE, 3)
 	. = ..()
 
 /obj/item/chems/water_balloon/on_update_icon()

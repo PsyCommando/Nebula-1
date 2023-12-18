@@ -80,7 +80,7 @@
 /obj/structure/catwalk/explosion_act(severity)
 	..()
 	if(!QDELETED(src) && severity != 3)
-		physically_destroyed()
+		physically_destroyed(,, TRUE)
 
 /obj/structure/catwalk/grab_attack(var/obj/item/grab/G)
 	var/mob/living/affecting_mob = G.get_affecting_mob()

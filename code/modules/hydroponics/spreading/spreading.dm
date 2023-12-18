@@ -244,15 +244,16 @@
 	if(aggression > 0)
 		adjust_health(-aggression*5)
 
-/obj/effect/vine/physically_destroyed(var/skip_qdel)
+/obj/effect/vine/physically_destroyed(skip_qdel, no_debris, quiet)
 	SHOULD_CALL_PARENT(FALSE)
-	die_off()
-	. = TRUE
+	if(!skip_qdel && !QDELETED(src))
+		die_off()
+		. = TRUE
 
 /obj/effect/vine/explosion_act(severity)
 	. = ..()
 	if(. && !QDELETED(src) && (severity == 1 || (severity == 2 && prob(50)) || (severity == 3 && prob(5))))
-		physically_destroyed()
+		physically_destroyed(,, TRUE)
 
 /obj/effect/vine/proc/adjust_health(value)
 	health = clamp(health + value, 0, max_health)

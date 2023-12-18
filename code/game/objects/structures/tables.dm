@@ -64,18 +64,22 @@
 /obj/structure/table/get_material_health_modifier()
 	. = additional_reinf_material ? 0.75 : 0.5
 
-/obj/structure/table/physically_destroyed(skip_qdel)
-	visible_message(SPAN_DANGER("\The [src] breaks down!"))
+/obj/structure/table/physically_destroyed(skip_qdel, no_debris, quiet)
+	if(!quiet)
+		visible_message(SPAN_DANGER("\The [src] breaks down!"))
 
 	// Destroy some stuff before passing off to dismantle(), which will return it in sheet form instead.
 	if(reinf_material && !prob(20))
-		reinf_material.place_shards(loc)
+		if(!no_debris)
+			reinf_material.place_shards(loc)
 		reinf_material = null
 	if(material && !prob(20))
-		material.place_shards(loc)
+		if(!no_debris)
+			material.place_shards(loc)
 		material = null
 	if(additional_reinf_material && !prob(20))
-		additional_reinf_material.place_shards(loc)
+		if(!no_debris)
+			additional_reinf_material.place_shards(loc)
 		additional_reinf_material = null
 	if(felted && prob(50))
 		felted = FALSE

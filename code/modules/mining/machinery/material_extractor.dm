@@ -34,9 +34,9 @@
 	QDEL_NULL(output_container)
 	. = ..()
 
-/obj/machinery/material_processing/extractor/physically_destroyed(skip_qdel)
+/obj/machinery/material_processing/extractor/physically_destroyed(skip_qdel, no_debris, quiet)
 	var/obj/container = remove_container()
-	if(container)
+	if(container && !no_debris)
 		container.dropInto(get_turf(src))
 	. = ..()
 

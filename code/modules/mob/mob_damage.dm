@@ -33,6 +33,6 @@
 		return
 	//#TODO: Turn severity to damage, so explosion protection and etc is actually used
 	if(severity == 1)
-		physically_destroyed()
+		physically_destroyed(,, TRUE)
 	else if(!is_blind())
 		flash_eyes()

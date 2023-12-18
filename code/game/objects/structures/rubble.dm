@@ -83,10 +83,12 @@
 	qdel(src)
 	. = TRUE
 
-/obj/structure/rubble/physically_destroyed(var/skip_qdel)
+/obj/structure/rubble/physically_destroyed(skip_qdel, no_debris, quiet)
 	SHOULD_CALL_PARENT(FALSE)
-	visible_message(SPAN_NOTICE("\The [src] is cleared away."))
-	qdel(src)
+	if(!quiet)
+		visible_message(SPAN_NOTICE("\The [src] is cleared away."))
+	if(!skip_qdel && !QDELETED(src))
+		qdel(src)
 	. = TRUE
 
 /obj/structure/rubble/house

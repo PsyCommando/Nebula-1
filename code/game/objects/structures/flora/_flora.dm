@@ -37,16 +37,17 @@
 	return TRUE
 
 //Drop some bits when destroyed
-/obj/structure/flora/physically_destroyed(skip_qdel)
-	if(!..(TRUE)) //Tell parents we'll delete ourselves
+/obj/structure/flora/physically_destroyed(skip_qdel, no_debris, quiet)
+	if(!..(TRUE, no_debris, quiet)) //Tell parents we'll delete ourselves
 		return
 	var/turf/T = get_turf(src)
 	if(T)
-		. = !isnull(create_remains())
-		if(snd_cut)
+		if(!no_debris)
+			. = !isnull(create_remains())
+		if(snd_cut && !quiet)
 			playsound(src, snd_cut, 60, TRUE)
 	//qdel only after we do our thing, since we have to access members
-	if(!skip_qdel)
+	if(!skip_qdel && !QDELETED(src))
 		qdel(src)
 
 /**Returns an instance of the object the plant leaves behind when destroyed. Null means it leaves nothing. */

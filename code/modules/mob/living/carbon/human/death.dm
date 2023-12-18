@@ -70,11 +70,12 @@
 		E.status |= ORGAN_DISFIGURED
 	update_body(1)
 
-/mob/living/carbon/human/physically_destroyed(var/skip_qdel, var/droplimb_type = DISMEMBER_METHOD_BLUNT)
-	for(var/obj/item/organ/external/limb in get_external_organs())
-		if(!limb.parent_organ) // don't dismember root
-			continue
-		limb.dismember(TRUE, droplimb_type, TRUE, TRUE)
-	dump_contents()
+/mob/living/carbon/human/physically_destroyed(skip_qdel, no_debris, quiet, var/droplimb_type = DISMEMBER_METHOD_BLUNT)
+	if(!no_debris)
+		for(var/obj/item/organ/external/limb in get_external_organs())
+			if(!limb.parent_organ) // don't dismember root
+				continue
+			limb.dismember(TRUE, droplimb_type, TRUE, TRUE)
+		dump_contents()
 	if(!skip_qdel && !QDELETED(src))
 		qdel(src)

@@ -86,8 +86,9 @@
 	else
 		return 0
 
-/obj/machinery/deployable/barrier/physically_destroyed(skip_qdel)
-	SSmaterials.create_object(/decl/material/solid/metal/steel, get_turf(src), 1, /obj/item/stack/material/rods)
+/obj/machinery/deployable/barrier/physically_destroyed(skip_qdel, no_debris, quiet)
+	if(!no_debris)
+		SSmaterials.create_object(/decl/material/solid/metal/steel, get_turf(src), 1, /obj/item/stack/material/rods)
 	. = ..()
 
 /obj/machinery/deployable/barrier/proc/explode()

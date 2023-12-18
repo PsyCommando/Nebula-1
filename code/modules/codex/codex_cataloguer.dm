@@ -132,9 +132,10 @@
 	QDEL_NULL(scan_radius_overlay)
 	return ..()
 
-/obj/item/cataloguer/physically_destroyed(skip_qdel)
+/obj/item/cataloguer/physically_destroyed(skip_qdel, no_debris, quiet)
 	if(loaded_disk)
-		loaded_disk.dropInto(loc)
+		if(!no_debris)
+			loaded_disk.dropInto(loc)
 		loaded_disk = null
 	return ..()
 

@@ -54,7 +54,7 @@
 /obj/structure/grille/explosion_act(severity)
 	..()
 	if(!QDELETED(src))
-		physically_destroyed()
+		physically_destroyed(,, TRUE)
 
 /obj/structure/grille/on_update_icon()
 	..()
@@ -152,13 +152,15 @@
 
 	take_damage(damage*0.2)
 
-/obj/structure/grille/proc/cut_grille()
-	playsound(loc, 'sound/items/Wirecutter.ogg', 100, 1)
+/obj/structure/grille/proc/cut_grille(no_debris, quiet)
+	if(!quiet)
+		//#FIXME: Tool sound should be handled by the tool itself!
+		playsound(loc, 'sound/items/Wirecutter.ogg', 100, TRUE)
 	if(destroyed)
 		qdel(src)
 	else
 		set_density(0)
-		if(material)
+		if(material && !no_debris)
 			material.create_object(get_turf(src), 1, parts_type)
 		destroyed = TRUE
 		parts_amount = 1
@@ -208,11 +210,12 @@
 				take_damage(W.force * 0.1)
 	..()
 
-/obj/structure/grille/physically_destroyed(var/skip_qdel)
+/obj/structure/grille/physically_destroyed(skip_qdel, no_debris, quiet)
 	SHOULD_CALL_PARENT(FALSE)
-	if(!destroyed)
+	if(!destroyed && !quiet)
 		visible_message(SPAN_DANGER("\The [src] falls to pieces!"))
-	cut_grille()
+
+	cut_grille(no_debris, quiet)
 	. = TRUE
 
 // shock user with probability prb (if all connections & power are working)

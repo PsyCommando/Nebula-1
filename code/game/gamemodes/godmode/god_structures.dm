@@ -57,8 +57,9 @@
 	qdel(src)
 	. = TRUE
 
-/obj/structure/deity/physically_destroyed(var/skip_qdel)
-	visible_message(SPAN_DANGER("\The [src] crumbles!"))
+/obj/structure/deity/physically_destroyed(skip_qdel, no_debris, quiet)
+	if(!quiet)
+		visible_message(SPAN_DANGER("\The [src] crumbles!"))
 	. = ..()
 
 /obj/structure/deity/bullet_act(var/obj/item/projectile/P)

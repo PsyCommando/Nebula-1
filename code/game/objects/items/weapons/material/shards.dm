@@ -134,9 +134,6 @@
 		return
 	physically_destroyed()
 
-/obj/item/shard/shatter(consumed)
-	physically_destroyed()
-
 /obj/item/shard/can_take_wear_damage()
 	return FALSE
 

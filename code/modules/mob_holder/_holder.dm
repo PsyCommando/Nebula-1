@@ -45,9 +45,10 @@
 		qdel(AM)
 	qdel(src)
 
-/obj/item/holder/physically_destroyed()
+/obj/item/holder/physically_destroyed(skip_qdel, no_debris, quiet)
 	SHOULD_CALL_PARENT(FALSE)
-	destroy_all()
+	if(!skip_qdel)
+		destroy_all()
 
 /obj/item/holder/Destroy()
 	clear_vis_contents(src)

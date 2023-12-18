@@ -102,7 +102,7 @@
 	..()
 	if(!QDELETED(src))
 		if(severity == 1)
-			physically_destroyed()
+			physically_destroyed(,, TRUE)
 		else if(severity == 2 || (severity == 3 && prob(50)))
 			deflate(TRUE)
 
@@ -136,29 +136,35 @@
 
 	return FALSE
 
-/obj/structure/inflatable/physically_destroyed(var/skip_qdel)
+/obj/structure/inflatable/physically_destroyed(skip_qdel, no_debris, quiet)
 	SHOULD_CALL_PARENT(FALSE)
-	. = deflate(1)
+	. = deflate(TRUE, no_debris, quiet)
 
 /obj/structure/inflatable/CtrlClick()
 	return hand_deflate()
 
-/obj/structure/inflatable/proc/deflate(var/violent=0)
-	playsound(loc, 'sound/machines/hiss.ogg', 75, 1)
+/obj/structure/inflatable/proc/deflate(violent = FALSE, no_debris = FALSE, quiet = FALSE)
+	if(!quiet)
+		playsound(loc, 'sound/machines/hiss.ogg', 75, TRUE)
 	if(violent)
-		visible_message("[src] rapidly deflates!")
-		var/obj/item/inflatable/torn/R = new(loc)
-		src.transfer_fingerprints_to(R)
+		if(!quiet)
+			visible_message("[src] rapidly deflates!")
+		if(!no_debris)
+			var/obj/item/inflatable/torn/R = new(loc)
+			src.transfer_fingerprints_to(R)
 		qdel(src)
 	else
 		if(!undeploy_path)
 			return
-		visible_message("\The [src] slowly deflates.")
+		if(!quiet)
+			visible_message("\The [src] slowly deflates.")
 		spawn(50)
-			var/obj/item/inflatable/R = new undeploy_path(src.loc)
-			src.transfer_fingerprints_to(R)
-			R.inflatable_health = health
+			if(!no_debris)
+				var/obj/item/inflatable/R = new undeploy_path(src.loc)
+				src.transfer_fingerprints_to(R)
+				R.inflatable_health = health
 			qdel(src)
+	return TRUE
 
 /obj/structure/inflatable/verb/hand_deflate()
 	set name = "Deflate"

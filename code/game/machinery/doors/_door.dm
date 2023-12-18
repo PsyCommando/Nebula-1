@@ -198,9 +198,10 @@
 		else
 			do_animate("deny")
 
-/obj/machinery/door/physically_destroyed(skip_qdel)
-	SSmaterials.create_object(/decl/material/solid/metal/steel, loc, 2)
-	SSmaterials.create_object(/decl/material/solid/metal/steel, loc, 3, /obj/item/stack/material/rods)
+/obj/machinery/door/physically_destroyed(skip_qdel, no_debris, quiet)
+	if(!no_debris)
+		SSmaterials.create_object(/decl/material/solid/metal/steel, loc, 2)
+		SSmaterials.create_object(/decl/material/solid/metal/steel, loc, 3, /obj/item/stack/material/rods)
 	. = ..()
 
 /obj/machinery/door/bullet_act(var/obj/item/projectile/Proj)
