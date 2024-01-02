@@ -123,11 +123,13 @@
 		return TRUE
 	. = ..()
 
-/obj/structure/net/physically_destroyed(var/skip_qdel)
+/obj/structure/net/physically_destroyed(skip_qdel, no_debris, quiet)
 	SHOULD_CALL_PARENT(FALSE)
-	visible_message("<span class='warning'>\The [src] is torn apart!</span>")
-	qdel(src)
-	. = TRUE
+	if(!quiet)
+		visible_message("<span class='warning'>\The [src] is torn apart!</span>")
+	if(!skip_qdel)
+		qdel(src)
+		. = TRUE
 
 /obj/structure/net/bullet_act(obj/item/projectile/P)
 	. = PROJECTILE_CONTINUE //few cloth ribbons won't stop bullet or energy ray

@@ -1,5 +1,5 @@
-/mob/living/slime/physically_destroyed()
-	if(is_adult)
+/mob/living/slime/physically_destroyed(skip_qdel, no_debris, quiet)
+	if(is_adult && !no_debris)
 		var/datum/ai/slime/my_ai = ai
 		var/decl/slime_colour/slime_data = GET_DECL(slime_type)
 		var/list/babies = list()
@@ -16,7 +16,8 @@
 		else if(key)
 			var/mob/my_baby = pick(babies)
 			my_baby.key = key
-	qdel(src)
+	if(!skip_qdel && !QDELETED(src))
+		qdel(src)
 
 /mob/living/slime/death(gibbed, deathmessage, show_dead_message)
 	if(stat != DEAD && !gibbed && is_adult)

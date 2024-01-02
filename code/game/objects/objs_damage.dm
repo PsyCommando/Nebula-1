@@ -125,6 +125,7 @@
 		return TRUE
 	//We're dead
 	pick_destruction_proc(difference, damage_type, damage_flags, FALSE, quiet)
+	//#FIXME: Slight issue is determining if we should drop debris on destruction, since some things such as lava and singularities just would instantly delete those..
 	return FALSE
 
 //////////////////////////////////////////////////////////////////////////

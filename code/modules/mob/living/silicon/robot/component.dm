@@ -249,12 +249,13 @@
 	health = max_health - (brute_damage + burn_damage)
 	check_health(amount, BURN)
 
-/obj/item/robot_parts/robot_component/physically_destroyed(skip_qdel)
-	var/obj/item/stock_parts/circuitboard/broken/broken_device = new (get_turf(src))
-	if(icon_state_broken != "broken")
-		broken_device.icon = src.icon
-		broken_device.icon_state = icon_state_broken
-	broken_device.name = "broken [name]"
+/obj/item/robot_parts/robot_component/physically_destroyed(skip_qdel, no_debris, quiet)
+	if(!no_debris)
+		var/obj/item/stock_parts/circuitboard/broken/broken_device = new (get_turf(src))
+		if(icon_state_broken != "broken")
+			broken_device.icon = src.icon
+			broken_device.icon_state = icon_state_broken
+		broken_device.name = "broken [name]"
 	. = ..()
 
 /obj/item/robot_parts/robot_component/proc/is_functional()

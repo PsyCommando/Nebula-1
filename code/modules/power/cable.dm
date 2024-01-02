@@ -234,7 +234,7 @@ By design, d1 is the smallest direction and d2 is the highest
 /obj/structure/cable/explosion_act(severity)
 	. = ..()
 	if(. && (severity == 1 || (severity == 2 && prob(50)) || (severity == 3 && prob(25))))
-		physically_destroyed()
+		physically_destroyed(,, TRUE)
 
 /obj/structure/cable/fire_act(datum/gas_mixture/air, exposed_temperature, exposed_volume)
 	var/turf/T = get_turf(src)

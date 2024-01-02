@@ -26,8 +26,9 @@
 	. = ..()
 	reagents.splash(get_turf(src), reagents.total_volume)
 
-/obj/item/chems/toner_cartridge/physically_destroyed(skip_qdel)
-	material.place_shards(get_turf(src), 2)
+/obj/item/chems/toner_cartridge/physically_destroyed(skip_qdel, no_debris, quiet)
+	if(!no_debris)
+		material.place_shards(get_turf(src), 2)
 	. = ..()
 
 /obj/item/chems/toner_cartridge/throw_impact(atom/hit_atom, datum/thrownthing/TT)

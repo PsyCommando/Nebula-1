@@ -24,13 +24,15 @@
 	. = ..()
 	foam_charges = max_foam_charges
 
-/obj/item/sealant_tank/physically_destroyed(var/skip_qdel)
+/obj/item/sealant_tank/physically_destroyed(skip_qdel, no_debris, quiet)
 	if(foam_charges)
 		var/turf/T = get_turf(src)
 		if(T)
-			T.visible_message(SPAN_WARNING("The ruptured [src.name] spews out metallic foam!"))
-			var/datum/effect/effect/system/foam_spread/s = new()
-			s.set_up(foam_charges, T, reagents, 1)
-			s.start()
+			if(!quiet)
+				T.visible_message(SPAN_WARNING("The ruptured [src.name] spews out metallic foam!"))
+			if(!no_debris)
+				var/datum/effect/effect/system/foam_spread/s = new()
+				s.set_up(foam_charges, T, reagents, 1)
+				s.start()
 			foam_charges = 0
 	. = ..()

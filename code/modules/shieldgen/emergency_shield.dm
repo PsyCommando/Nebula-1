@@ -68,7 +68,7 @@
 /obj/machinery/shield/explosion_act(severity)
 	. = ..()
 	if(. && ((severity == 1 && prob(75)) || (severity == 2 && prob(50)) || (severity == 3 && prob(25))))
-		physically_destroyed()
+		physically_destroyed(,, TRUE)
 
 /obj/machinery/shield/emp_act(severity)
 	switch(severity)

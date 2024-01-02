@@ -1564,10 +1564,10 @@ Note that amputating the affected organ does in fact remove the infection from t
 	return FALSE
 
 // This likely seems excessive, but refer to organ explosion_act() to see how it should be handled before reaching this point.
-/obj/item/organ/external/physically_destroyed(skip_qdel)
+/obj/item/organ/external/physically_destroyed(skip_qdel, no_debris, quiet)
 	if(owner)
 		if(limb_flags & ORGAN_FLAG_CAN_AMPUTATE)
-			dismember(FALSE, DISMEMBER_METHOD_BLUNT)
+			dismember(FALSE, DISMEMBER_METHOD_BLUNT, , quiet)
 		else
 			owner.gib()
 	else

@@ -137,6 +137,7 @@
 	//Deal the actual damage we suffered
 	if(amount <= 0)
 		return 0 //must return a number
+	//Apply health change takes a negative value when dealing damage
 	apply_health_change(-1 * amount, damage_type, damage_flags, inflicter, def_zone, quiet)
 	return amount
 
@@ -196,6 +197,7 @@
 	- Returns: A list of armors to apply to the damage for the given def_zone. Or null.
  */
 /atom/movable/proc/get_armors_by_zone(def_zone, damage_type, damage_flags)
+	//Default behavior is to ignore def_zone
 	var/base_armor = get_extension(src, /datum/extension/armor)
 	if(base_armor)
 		LAZYADD(., base_armor)

@@ -115,7 +115,7 @@ So, hopefully this is helpful if any more icons are to be added/changed/wonderin
 /obj/structure/particle_accelerator/explosion_act(severity)
 	. = ..()
 	if(severity == 1 || (severity == 2 && prob(50)) || (severity == 3 && prob(25)))
-		physically_destroyed()
+		physically_destroyed(,, TRUE)
 
 /obj/structure/particle_accelerator/on_update_icon()
 	..()
@@ -248,7 +248,7 @@ So, hopefully this is helpful if any more icons are to be added/changed/wonderin
 /obj/machinery/particle_accelerator/explosion_act(severity)
 	. = ..()
 	if(. && (severity == 1 || (severity == 2 && prob(50)) || (severity == 3 && prob(25))))
-		physically_destroyed()
+		physically_destroyed(,, TRUE)
 
 /obj/machinery/particle_accelerator/proc/update_state()
 	return 0

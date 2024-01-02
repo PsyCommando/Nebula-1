@@ -134,7 +134,7 @@
 				.[tech] += 1
 	for(var/mat in loaded_item.matter)
 		LAZYSET(cached_materials, mat, cached_materials[mat] + (loaded_item.matter[mat] * material_return_modifier))
-	loaded_item.physically_destroyed(FALSE)
+	loaded_item.physically_destroyed()
 	if(!QDELETED(loaded_item))
 		QDEL_NULL(loaded_item)
 	else

@@ -63,7 +63,7 @@ var/global/const/MAX_GEOTHERMAL_PRESSURE =               12000
 /obj/effect/geyser/explosion_act(severity)
 	. = ..()
 	if(!QDELETED(src) && prob(100 - (25 * severity)))
-		physically_destroyed()
+		physically_destroyed(,, TRUE)
 
 /obj/effect/geyser/hide(hide)
 	var/datum/extension/geothermal_vent/E = get_extension(src, /datum/extension/geothermal_vent)

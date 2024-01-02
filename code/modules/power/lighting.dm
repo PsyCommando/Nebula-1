@@ -389,7 +389,7 @@
 	. = ..()
 	if(. && !QDELETED(src))
 		if(severity == 1)
-			physically_destroyed()
+			physically_destroyed(,, TRUE)
 		else if((severity == 2 && prob(75)) || (severity == 3 && prob(50)))
 			broken()
 

@@ -106,7 +106,7 @@
 	if(check_triggers(/datum/artifact_trigger/proc/on_explosion, severity))
 		return
 	if(severity == 1 || (severity == 2 && prob(50)))
-		physically_destroyed()
+		physically_destroyed(,, TRUE)
 
 /obj/structure/artifact/Move()
 	..()

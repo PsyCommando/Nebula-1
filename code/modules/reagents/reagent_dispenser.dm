@@ -111,15 +111,15 @@
 	if (N)
 		amount_dispensed = N
 
-/obj/structure/reagent_dispensers/physically_destroyed(var/skip_qdel)
-	if(reagents?.total_volume)
+/obj/structure/reagent_dispensers/physically_destroyed(skip_qdel, no_debris, quiet)
+	if(reagents?.total_volume && !no_debris)
 		reagents.trans_to_turf(get_turf(src), reagents.total_volume)
 	. = ..()
 
 /obj/structure/reagent_dispensers/explosion_act(severity)
 	. = ..()
 	if(. && (severity == 1) || (severity == 2 && prob(50)) || (severity == 3 && prob(5)))
-		physically_destroyed()
+		physically_destroyed(,, TRUE)
 
 //Dispensers
 /obj/structure/reagent_dispensers/watertank

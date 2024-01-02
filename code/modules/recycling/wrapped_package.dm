@@ -236,8 +236,8 @@
 	update_icon()
 	playsound(src, 'sound/effects/checkout.ogg', 40, TRUE, 2)
 
-/obj/item/parcel/physically_destroyed(skip_qdel)
-	if(istype(material) && LAZYACCESS(matter, material.type))
+/obj/item/parcel/physically_destroyed(skip_qdel, no_debris, quiet)
+	if(istype(material) && LAZYACCESS(matter, material.type) && !no_debris)
 		var/list/cuttings = material.place_cuttings(get_turf(src), matter[material.type])
 		//Make the bits of paper the right color
 		for(var/obj/item/C in cuttings)

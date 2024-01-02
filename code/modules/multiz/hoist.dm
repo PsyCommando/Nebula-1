@@ -169,7 +169,7 @@
 	. = ..()
 	if(.)
 		if(severity == 1 || (severity == 2 && prob(50)))
-			physically_destroyed()
+			physically_destroyed(,, TRUE)
 		else if(severity == 2)
 			visible_message("\The [src] shakes violently, and neatly collapses as its damage sensors go off.")
 			collapse_kit()
