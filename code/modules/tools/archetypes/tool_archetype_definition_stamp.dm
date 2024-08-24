@@ -1,15 +1,15 @@
 /decl/tool_archetype/stamp
-	name        = "stamp"
-	use_message = "stamping"
-	use_sound   = 'sound/effects/stamp.ogg'
-	properties  = list(
+	name         = "stamp"
+	tool_message = "stamping"
+	tool_sound   = 'sound/effects/stamp.ogg'
+	properties   = list(
 		TOOL_PROP_COLOR           = "black",
 		TOOL_PROP_COLOR_NAME      = "black",
 		TOOL_PROP_STAMP_ICON      = "",
 		TOOL_PROP_USES            = -1,
 		)
 
-/decl/tool_archetype/stamp/proc/decrement_uses(var/mob/user, var/obj/item/tool, var/decrement = 1)
+/decl/tool_archetype/stamp/proc/decrement_uses(mob/user, obj/item/tool, decrement = 1)
 	. = tool.get_tool_property(TOOL_STAMP, TOOL_PROP_USES)
 	if(. < 0)
 		return TRUE

@@ -64,24 +64,19 @@
 // Stamp Symbols Definitions
 //////////////////////////////////////////////////////////////////////////////////
 
-//----------------------
-// --- Default stamp ---
-//----------------------
+///Default Stamp
 /decl/stamp_type/default
 	name = "circle"
 
-//-----------------------
-// --- Approved stamp ---
-//-----------------------
+///Default Approved Stamp
 /decl/stamp_type/approved
 	name                = "approved"
 	stamp_color_name    = "dark green"
 	stamp_color         = "#006600"
 	stamp_overlay_state = "stamp-checkmark"
 	attack_verbs        = list("stamped", "approved")
-//---------------------
-// --- Denied stamp ---
-//---------------------
+
+///Default Denied Stamp
 /decl/stamp_type/denied
 	name                = "denied"
 	stamp_color_name    = "dark red"
@@ -89,18 +84,14 @@
 	stamp_overlay_state = "stamp-x"
 	attack_verbs        = list("stamped", "denied")
 
-//-----------------
-// --- OK stamp ---
-//-----------------
+///Default OK Stamp
 /decl/stamp_type/ok
 	name                = "ok"
 	stamp_color_name    = "dark green"
 	stamp_color         = "#006600"
 	stamp_overlay_state = "stamp-ok"
 
-//--------------------
-// --- Clown stamp ---
-//--------------------
+///Default Clown Stamp
 /decl/stamp_type/clown
 	name                = "clown"
 	owner_name          = "clown"
@@ -108,9 +99,7 @@
 	stamp_overlay_state = "paper_stamp-clown"
 	attack_verbs        = list("honk'ed", "got clowned on", "got applied a honk on")
 
-//-------------------
-// --- Boss stamp ---
-//-------------------
+///Map's "boss_name" Stamp. Is signed with whatever the boss_name is at runtime.
 /decl/stamp_type/boss
 	name                = "boss"
 	owner_name          = "boss"
@@ -130,9 +119,7 @@
 		my_verbs[index] = replacetextEx(my_verbs[index], "_BOSS_", "[global.using_map.boss_name]'s'")
 	return my_verbs
 
-//-----------------------
-// --- Shipping stamp ---
-//-----------------------
+///Default Shipping Stamp
 /decl/stamp_type/shipping
 	name                = "shipping"
 	stamp_color_name    = "pale yellow"
@@ -173,7 +160,7 @@
 	if(ispath(stamp_symbol))
 		set_stamp_symbol(stamp_symbol)
 
-/obj/item/stamp/proc/set_stamp_symbol(var/decl/stamp_type/_stamp_symbol)
+/obj/item/stamp/proc/set_stamp_symbol(decl/stamp_type/_stamp_symbol)
 	if(ispath(_stamp_symbol))
 		_stamp_symbol = GET_DECL(_stamp_symbol)
 	stamp_symbol = _stamp_symbol
@@ -183,12 +170,12 @@
 	set_tool_property(TOOL_STAMP, TOOL_PROP_STAMP_OVERLAY, stamp_symbol.get_stamp_overlay())
 	set_tool_property(TOOL_STAMP, TOOL_PROP_STAMP_MESSAGE, stamp_symbol.get_stamped_message())
 
-/obj/item/stamp/proc/set_ink_color(var/_ink_color, var/_ink_color_name)
+/obj/item/stamp/proc/set_ink_color(_ink_color, _ink_color_name)
 	set_tool_property(TOOL_STAMP, TOOL_PROP_COLOR,      _ink_color)
 	set_tool_property(TOOL_STAMP, TOOL_PROP_COLOR_NAME, _ink_color_name)
 
 //////////////////////////////////////////////////////////////////////////////////
-// Stamp Definitions
+// Stamp Items Definitions
 //////////////////////////////////////////////////////////////////////////////////
 
 //Shipping Stamp
@@ -197,7 +184,7 @@
 	icon_state   = "stamp-cargo"
 	stamp_symbol = /decl/stamp_type/shipping
 
-//Denied Stamp
+//Approved Stamp
 /obj/item/stamp/approved
 	name         = "\improper APPROVED rubber stamp"
 	icon_state   = "stamp-approved"
@@ -210,14 +197,13 @@
 	stamp_symbol = /decl/stamp_type/denied
 
 //Denied Rig Stamp
-
 /obj/item/stamp/denied/rig
 	max_health   = ITEM_HEALTH_NO_DAMAGE
 	force        = 0
 	pickup_sound = null
 	drop_sound   = null //Rig will handle sounds if it wants to
 	equip_sound  = null
-	w_class      = ITEM_SIZE_NO_CONTAINER
+	obj_flags    = OBJ_FLAG_NO_STORAGE
 
 //Ok Stamp
 /obj/item/stamp/ok
@@ -246,15 +232,14 @@
 	//Get the proper boss name
 	SetName("[global.using_map.boss_name]'s' rubber stamp")
 
-//Multi Stamp
-
+///Stamp item with the ability to pick from a list of available stamp symbols.
 /obj/item/stamp/multi
 	name = "rubber multi-stamp"
 
-/obj/item/stamp/multi/proc/make_stamp_choices_list(var/allow_restricted = FALSE)
+/obj/item/stamp/multi/proc/make_stamp_choices_list(allow_restricted = FALSE)
 	return list("EXIT" = null) + global.get_stamps_types_by_name(allow_restricted) // the list that will be shown to the user to pick from
 
-/obj/item/stamp/multi/proc/ask_stamp_type(var/mob/user, var/list/options, var/question)
+/obj/item/stamp/multi/proc/ask_stamp_type(mob/user, list/options, question)
 	. = input(user, question) in options
 	if(QDELETED(src) || QDELETED(user) || . == "EXIT" || !CanUseTopic(user, global.hands_topic_state))
 		return null
@@ -266,8 +251,7 @@
 		return
 	set_stamp_symbol(sorted_stamps[capitalize(input_stamp)])
 
-//Rig Variant
-
+//Special Rig Variant
 /obj/item/stamp/multi/rig
 	name         = "rig rubber multi-stamp"
 	max_health   = ITEM_HEALTH_NO_DAMAGE
@@ -275,7 +259,7 @@
 	pickup_sound = null
 	drop_sound   = null //Rig will handle sounds if it wants to
 	equip_sound  = null
-	w_class      = ITEM_SIZE_NO_CONTAINER
+	obj_flags    = OBJ_FLAG_NO_STORAGE
 
 /obj/item/stamp/multi/attack_self(mob/user)
 	return //The rig is using attack_self for switch between two stamps, so we need to handle it differently
@@ -291,9 +275,7 @@
 /decl/interaction_handler/rig_pick_stamp/invoked(obj/item/stamp/multi/rig/target, mob/user, obj/item/prop)
 	target.attack_self(user)
 
-//Chameleon Stamp
-
-/// Syndicate stamp to forge documents.
+///Chameleon Stamp, Syndicate stamp to forge documents.
 /obj/item/stamp/multi/chameleon
 	name = "chameleon stamp" //gets replaced after attack self, just a helper for mappers
 
@@ -308,4 +290,3 @@
 	. = ..()
 	if(stamp_symbol)
 		SetName(stamp_symbol.get_stamp_display_name()) //Copy over the name, so we know what's currently set
-
