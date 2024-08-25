@@ -60,13 +60,26 @@
 		stamp_overlay = generate_stamp_overlay()
 	return stamp_overlay
 
+///Applies the stamp type's properties to the given item with the stamp tool archetype
+/decl/stamp_type/proc/setup_stamp_tool(obj/item/tool)
+	tool.set_tool_property(TOOL_STAMP, TOOL_PROP_STAMP_SYMBOL,  src)
+	tool.set_tool_property(TOOL_STAMP, TOOL_PROP_COLOR,         stamp_color)
+	tool.set_tool_property(TOOL_STAMP, TOOL_PROP_COLOR_NAME,    stamp_color_name)
+	tool.set_tool_property(TOOL_STAMP, TOOL_PROP_STAMP_OVERLAY, get_stamp_overlay())
+	tool.set_tool_property(TOOL_STAMP, TOOL_PROP_STAMP_MESSAGE, get_stamped_message())
+	var/list/new_verbs = get_attack_verbs()
+	if(length(new_verbs))
+		tool.attack_verb = get_attack_verbs()
+
 //////////////////////////////////////////////////////////////////////////////////
 // Stamp Symbols Definitions
 //////////////////////////////////////////////////////////////////////////////////
 
 ///Default Stamp
 /decl/stamp_type/default
-	name = "circle"
+	name             = "circle"
+	stamp_color_name = "grey"
+	stamp_color      = "grey"
 
 ///Default Approved Stamp
 /decl/stamp_type/approved
@@ -150,26 +163,31 @@
 	///The icon state of the stamp overlay applied.
 	var/decl/stamp_type/stamp_symbol = /decl/stamp_type/default
 	///The maximum amount of usages this stamp gets from a single ink refill. -1 means infinite uses.
-	var/ink_max_uses   = -1
+	var/ink_max_uses = TOOL_USES_INFINITE
 
 /obj/item/stamp/Initialize(ml, material_key)
 	. = ..()
 	set_extension(src, /datum/extension/tool,
-		list(TOOL_STAMP = TOOL_QUALITY_GOOD),
-		TOOL_STAMP = list(TOOL_PROP_USES = ink_max_uses))
+		list(
+			TOOL_STAMP = TOOL_QUALITY_GOOD
+		),
+		list(
+			TOOL_STAMP = list(
+				TOOL_PROP_USES = ink_max_uses
+			)
+		)
+	)
 	if(ispath(stamp_symbol))
 		set_stamp_symbol(stamp_symbol)
 
+///Sets the stamp definition to use when stamping something with the stamp
 /obj/item/stamp/proc/set_stamp_symbol(decl/stamp_type/_stamp_symbol)
 	if(ispath(_stamp_symbol))
 		_stamp_symbol = GET_DECL(_stamp_symbol)
 	stamp_symbol = _stamp_symbol
-	attack_verb  = stamp_symbol.get_attack_verbs()
-	set_ink_color(stamp_symbol.stamp_color, stamp_symbol.stamp_color_name)
-	set_tool_property(TOOL_STAMP, TOOL_PROP_STAMP_SYMBOL,  stamp_symbol)
-	set_tool_property(TOOL_STAMP, TOOL_PROP_STAMP_OVERLAY, stamp_symbol.get_stamp_overlay())
-	set_tool_property(TOOL_STAMP, TOOL_PROP_STAMP_MESSAGE, stamp_symbol.get_stamped_message())
+	stamp_symbol.setup_stamp_tool(src)
 
+///Helper for changing the current ink color of the stamp. Used when refilling ink. (#TODO)
 /obj/item/stamp/proc/set_ink_color(_ink_color, _ink_color_name)
 	set_tool_property(TOOL_STAMP, TOOL_PROP_COLOR,      _ink_color)
 	set_tool_property(TOOL_STAMP, TOOL_PROP_COLOR_NAME, _ink_color_name)
@@ -235,6 +253,7 @@
 ///Stamp item with the ability to pick from a list of available stamp symbols.
 /obj/item/stamp/multi
 	name = "rubber multi-stamp"
+	stamp_symbol = null //Don't set a starting stamp archetype
 
 /obj/item/stamp/multi/proc/make_stamp_choices_list(allow_restricted = FALSE)
 	return list("EXIT" = null) + global.get_stamps_types_by_name(allow_restricted) // the list that will be shown to the user to pick from
@@ -278,6 +297,7 @@
 ///Chameleon Stamp, Syndicate stamp to forge documents.
 /obj/item/stamp/multi/chameleon
 	name = "chameleon stamp" //gets replaced after attack self, just a helper for mappers
+	stamp_symbol = null
 
 /obj/item/stamp/multi/chameleon/attack_self(mob/user)
 	var/list/sorted_stamps  = make_stamp_choices_list(TRUE)

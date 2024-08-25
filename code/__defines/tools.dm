@@ -44,6 +44,9 @@
 #define TOOL_SPEED_DEFAULT  1
 #define TOOL_SPEED_BEST   0.5
 
+///Special value for the uses property for tools
+#define TOOL_USES_INFINITE -1
+
 // Helper macros for interaction checks.
 #define IS_TOOL(A, T)     (isatom(A) && A.get_tool_quality(T) > 0)
 #define IS_SAW(A)         IS_TOOL(A, TOOL_SAW)
@@ -91,6 +94,7 @@
 ///Property for things that have a fixed amount of uses. -1 is unlimited.
 #define TOOL_PROP_USES          "uses_left"
 
+// -- Pens --
 ///Property for pens to specify additional properties about themselves
 #define TOOL_PROP_PEN_FLAG        "pen_flag"
 ///Property for pens specifically. Returns a stored forged signature if there's one.
@@ -100,6 +104,7 @@
 ///Property for pens returns the font the pen uses
 #define TOOL_PROP_PEN_FONT        "pen_font"
 
+// -- Stamps --
 ///The property for specifying the stamp decl that a stamp uses
 #define TOOL_PROP_STAMP_SYMBOL  "stamp_definition"
 ///The actual image to apply to the target of the stamp tool.

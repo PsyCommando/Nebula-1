@@ -13,7 +13,7 @@
 	var/stroke_color      = "black"                             //What colour the ink is! Can be hexadecimal colour or a colour name string.
 	var/stroke_color_name = "black"                             //Human readable name of the stroke colour. Used in text strings, and to identify the nearest colour to the stroke colour.
 	var/medium_name        = "ink"                               //Whatever the pen uses to leave its mark. Used in text strings.
-	var/max_uses           = -1                                  //-1 for unlimited uses.
+	var/max_uses           = TOOL_USES_INFINITE                  //-1 for unlimited uses.
 	var/pen_quality        = TOOL_QUALITY_DEFAULT                //What will be set as tool quality for the pen
 	///The type of font this pen's written text will be represented with
 	var/pen_font           = PEN_FONT_DEFAULT

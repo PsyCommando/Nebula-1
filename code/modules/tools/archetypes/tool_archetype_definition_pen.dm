@@ -6,7 +6,7 @@
 		TOOL_PROP_COLOR           = "black",
 		TOOL_PROP_COLOR_NAME      = "black",
 		TOOL_PROP_PEN_FLAG        = 0,
-		TOOL_PROP_USES            = -1,
+		TOOL_PROP_USES            = TOOL_USES_INFINITE,
 		TOOL_PROP_PEN_SIG         = null,
 		TOOL_PROP_PEN_SHADE_COLOR = "black",
 		TOOL_PROP_PEN_FONT        = PEN_FONT_DEFAULT,
@@ -23,7 +23,7 @@
 
 /decl/tool_archetype/pen/proc/decrement_uses(var/mob/user, var/obj/item/tool, var/decrement = 1, var/destroy_on_zero = TRUE)
 	. = tool.get_tool_property(TOOL_PEN, TOOL_PROP_USES)
-	if(. < 0)
+	if(. == TOOL_USES_INFINITE)
 		return TRUE
 	. -= decrement
 	tool.set_tool_property(TOOL_PEN, TOOL_PROP_USES, max(0, .)) //Prevent negatives and turning the pen into an infinite uses pen
@@ -40,13 +40,13 @@
 
 /decl/tool_archetype/pen/can_use_tool(obj/item/tool, expend_fuel = 1)
 	var/uses = tool.get_tool_property(TOOL_PEN, TOOL_PROP_USES)
-	return ..() && ((uses < 0) || (uses - expend_fuel) >= 0)
+	return ..() && ((uses == TOOL_USES_INFINITE) || (uses - expend_fuel) >= 0)
 
 /decl/tool_archetype/pen/handle_pre_interaction(mob/user, obj/item/tool, expend_fuel = 1)
 	var/uses_left = tool.get_tool_property(TOOL_PEN, TOOL_PROP_USES)
-	if(uses_left < 0)
+	if(uses_left == TOOL_USES_INFINITE)
 		return TOOL_USE_SUCCESS //Infinite
-	if(uses_left == 0)
+	if((uses_left - expend_fuel) <= 0)
 		to_chat(user, SPAN_WARNING("\The [tool] is spent."))
 		return TOOL_USE_FAILURE
 	return TOOL_USE_SUCCESS

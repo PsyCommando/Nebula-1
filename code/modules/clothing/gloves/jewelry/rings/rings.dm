@@ -86,33 +86,50 @@
 	owner_name          = "secretary-general"
 	stamp_color_name    = "red"
 	stamp_overlay_state = "paper_seal-signet"
+	is_restricted       = TRUE //Don't appear in multi-stamp stamps list
 
 /obj/item/clothing/gloves/ring/seal
 	name = "Secretary-General's official seal"
 	desc = "The official seal of the Secretary-General of the Sol Central Government, featured prominently on a silver ring."
 	icon = 'icons/clothing/accessories/jewelry/rings/ring_seal_secgen.dmi'
-	///
+	///The stamp definition to use when leaving a stamp.
 	var/decl/stamp_type/stamp_symbol = /decl/stamp_type/ring_secretary_general
 	///Maximum amount of uses given by a single fill. If -1, means infinite.
-	var/max_uses = -1
+	var/max_uses = TOOL_USES_INFINITE
 
 /obj/item/clothing/gloves/ring/seal/Initialize(ml, material_key)
 	. = ..()
-	set_extension(src, /datum/extension/tool, list(TOOL_STAMP = TOOL_QUALITY_GOOD), TOOL_STAMP = list(TOOL_PROP_USES = max_uses))
+	set_extension(src, /datum/extension/tool,
+		list(
+			TOOL_STAMP = TOOL_QUALITY_GOOD
+		),
+		list(
+			TOOL_STAMP = list(
+				TOOL_PROP_USES = max_uses
+			),
+		)
+	)
 	if(ispath(stamp_symbol))
 		set_stamp_symbol(stamp_symbol)
 
+///Sets the stamp definition to use when stamping something with the ring
 /obj/item/clothing/gloves/ring/seal/proc/set_stamp_symbol(decl/stamp_type/_stamp_symbol)
 	if(ispath(_stamp_symbol))
 		_stamp_symbol = GET_DECL(_stamp_symbol)
 	stamp_symbol = _stamp_symbol
-	set_tool_property(TOOL_STAMP, TOOL_PROP_STAMP_SYMBOL, stamp_symbol)
+	stamp_symbol.setup_stamp_tool(src)
+
+///Helper for changing the current ink color of the stamp. Used when refilling ink. (#TODO)
+/obj/item/clothing/gloves/ring/seal/proc/set_ink_color(_ink_color, _ink_color_name)
+	set_tool_property(TOOL_STAMP, TOOL_PROP_COLOR,      _ink_color)
+	set_tool_property(TOOL_STAMP, TOOL_PROP_COLOR_NAME, _ink_color_name)
 
 //Mason Ring
 /decl/stamp_type/ring_mason
 	name                = "mason"
 	stamp_color_name    = "bronze"
 	stamp_overlay_state = "paper_seal-masonic"
+	is_restricted       = TRUE //Don't appear in multi-stamp stamps list
 
 /obj/item/clothing/gloves/ring/seal/mason
 	name         = "masonic ring"
@@ -121,17 +138,20 @@
 	stamp_symbol = /decl/stamp_type/ring_mason
 
 //Signet Ring
+/decl/stamp_type/ring_signet
+	name                = "signet ring"
+	stamp_color_name    = "red"
+	stamp_overlay_state = "paper_seal-signet"
+	stamp_text          = "stamped by an unsigned signet ring"
+	is_restricted       = TRUE //Don't appear in multi-stamp stamps list
+
 /obj/item/clothing/gloves/ring/seal/signet
 	name           = "signet ring"
 	desc           = "A signet ring, for when you're too sophisticated to sign letters."
 	icon           = 'icons/clothing/accessories/jewelry/rings/ring_seal_signet.dmi'
-	stamp_symbol   = null
+	stamp_symbol   = /decl/stamp_type/ring_signet
+	///Name that will be stamped when using the signet ring
 	var/owner_name
-
-/obj/item/clothing/gloves/ring/seal/signet/Initialize(ml, material_key)
-	. = ..()
-	set_tool_property(TOOL_STAMP, TOOL_PROP_STAMP_OVERLAY, overlay_image('icons/obj/items/rubber_stamps_overlays.dmi', "paper_seal-signet", null, RESET_COLOR))
-	set_tool_property(TOOL_STAMP, TOOL_PROP_STAMP_MESSAGE, "stamped by [name]")
 
 /obj/item/clothing/gloves/ring/seal/signet/proc/set_signet_owner(var/mob/living/user)
 	if(length(owner_name))
@@ -144,6 +164,8 @@
 	to_chat(user, SPAN_NOTICE("You claim \the [src] as your own!"))
 	SetName("[user]'s signet ring")
 	desc = "A signet ring belonging to [user], for when you're too sophisticated to sign letters."
+
+	//Change the stamp message to refer to the signet ring owner.
 	set_tool_property(TOOL_STAMP, TOOL_PROP_STAMP_MESSAGE, "stamped by \the [src]")
 
 /obj/item/clothing/gloves/ring/seal/signet/attack_self(mob/user)
