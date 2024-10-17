@@ -7,14 +7,10 @@
 	board_type = "wall"
 	build_path = /obj/machinery/computer/modular/telescreen
 	req_components = list(
-		/obj/item/stock_parts/console_screen = 1,
+		/obj/item/stock_parts/console_screen          = 1,
 		/obj/item/stock_parts/computer/processor_unit = 1
 	)
-	additional_spawn_components = list(
-		/obj/item/stock_parts/power/apc/buildable = 1,
-		/obj/item/stock_parts/computer/network_card = 1,
-		/obj/item/stock_parts/computer/hard_drive/super = 1
-	)
+	//Don't set any additional spawn components. It'll conflict with presets' components
 
 //////////////////////////////////////////////////////////////////
 // Telescreen Frame

@@ -5,11 +5,10 @@
 /obj/machinery/computer/modular/telescreen/preset
 	base_type = /obj/machinery/computer/modular/telescreen
 	uncreated_component_parts = list(
-		/obj/item/stock_parts/computer/processor_unit,
-		/obj/item/stock_parts/computer/tesla_link,
-		/obj/item/stock_parts/computer/hard_drive,
-		/obj/item/stock_parts/computer/network_card,
-		/obj/item/stock_parts/computer/card_slot,
+		/obj/item/stock_parts/power/apc/buildable   = 1,
+		/obj/item/stock_parts/computer/network_card = 1,
+		/obj/item/stock_parts/computer/hard_drive   = 1,
+		/obj/item/stock_parts/computer/card_slot    = 1,
 	)
 	var/list/default_software
 	var/datum/computer_file/program/autorun_program

@@ -5,23 +5,42 @@
 	/// Ex. list("RECORDS_MAINFRAME" = "records")
 	var/automount_disks
 	base_type = /obj/machinery/computer/modular
+	uncreated_component_parts = list(
+		/obj/item/stock_parts/power/apc/buildable,
+		/obj/item/stock_parts/computer/hard_drive/super,
+		/obj/item/stock_parts/computer/network_card,
+		/obj/item/stock_parts/computer/nano_printer,
+		/obj/item/stock_parts/computer/scanner/paper
+	)
 
 /obj/machinery/computer/modular/preset/full
 	uncreated_component_parts = list(
-		/obj/item/stock_parts/power/apc,
+		/obj/item/stock_parts/power/apc/buildable,
+		/obj/item/stock_parts/computer/hard_drive/super,
+		/obj/item/stock_parts/computer/network_card,
+		/obj/item/stock_parts/computer/nano_printer,
+		/obj/item/stock_parts/computer/scanner/paper,
 		/obj/item/stock_parts/computer/card_slot,
-		/obj/item/stock_parts/computer/ai_slot,
+		/obj/item/stock_parts/computer/ai_slot
 		)
 
 /obj/machinery/computer/modular/preset/aislot
 	uncreated_component_parts = list(
-		/obj/item/stock_parts/power/apc,
+		/obj/item/stock_parts/power/apc/buildable,
+		/obj/item/stock_parts/computer/hard_drive/super,
+		/obj/item/stock_parts/computer/network_card,
+		/obj/item/stock_parts/computer/nano_printer,
+		/obj/item/stock_parts/computer/scanner/paper,
 		/obj/item/stock_parts/computer/ai_slot
 		)
 
 /obj/machinery/computer/modular/preset/cardslot
 	uncreated_component_parts = list(
-		/obj/item/stock_parts/power/apc,
+		/obj/item/stock_parts/power/apc/buildable,
+		/obj/item/stock_parts/computer/hard_drive/super,
+		/obj/item/stock_parts/computer/network_card,
+		/obj/item/stock_parts/computer/nano_printer,
+		/obj/item/stock_parts/computer/scanner/paper,
 		/obj/item/stock_parts/computer/card_slot
 		)
 
